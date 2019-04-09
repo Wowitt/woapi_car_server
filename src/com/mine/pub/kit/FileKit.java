@@ -206,7 +206,6 @@ public class FileKit {
 	 * @date 20150927
 	 * @读取文件内容
 	 * */
-	@SuppressWarnings("resource")
 	public static StringBuffer readFile(String filename)
 	{
 		StringBuffer sb = null;

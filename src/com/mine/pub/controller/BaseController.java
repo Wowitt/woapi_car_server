@@ -13,6 +13,7 @@ import com.jfinal.core.Controller;
 import com.jfinal.plugin.ehcache.CacheKit;
 import com.jfinal.render.Render;
 import com.mine.pub.kit.DateKit;
+import com.mine.pub.kit.FileKit;
 import com.mine.pub.kit.JsonMyKit;
 import com.mine.pub.pojo.CommonDao;
 import com.mine.render.MyCaptchaRender;
@@ -254,13 +255,14 @@ public class BaseController extends Controller
 	private void doUserBaseInfo()
 	{
 		setAttr("userPortrait", getMySession("userPortrait") == null ? "" : getMySession("userPortrait"));
-		setAttr("ifLogin", getMySession("ifLogin") == null ? "0" : getMySession("ifLogin"));
+		setAttr("ifLogin", getMySession("ifLogin") == null ? "1" : getMySession("ifLogin"));
 		setAttr("nickName", getMySession("nickName") == null ? "" : getMySession("nickName")); //其实是username
 		setAttr("userId", getMySession("userId") == null ? "" : getMySession("userId"));
 		setAttr("userType", getMySession("userType") == null ? "" : getMySession("userType"));
 		setAttr("userName", getMySession("userName") == null ? "" : getMySession("userName"));
 		setAttr("realName", getMySession("realName") == null ? "" : getMySession("realName"));
 		setAttr("roleId", getMySession("roleId") == null ? "" : getMySession("roleId"));
+		setAttr("roleIds", getMySession("roleIds") == null ? "" : getMySession("roleIds"));
 		setAttr("status", getMySession("status") == null ? "" : getMySession("status"));
 		setAttr("WJWT", getMySession("WJWT") == null ? "" : getMySession("WJWT"));
 		setAttr("contextPath", getRequest().getContextPath());
@@ -348,5 +350,29 @@ public class BaseController extends Controller
     	this.setMySession("checkCode",random);
     	this.setAttr("checkCode", random);
     	this.renderJson();
+	}
+    
+    /**
+	 * @author woody
+	 * @date 2015-4-12
+	 * @将base64转成图片存放的路径
+	 * */
+	public String base64ToImgpath(String content,String filename,String name)
+	{
+		StringBuffer sb = new StringBuffer();
+		content = content.replaceAll(" ", "+");
+		String contents[] = content.split("data:image/");
+		for(int i = 0 ; i < contents.length ; i++)
+		{
+			if(contents[i].indexOf("base64,") > 0 )
+			{
+				String suffix = contents[i].substring(0, contents[i].indexOf(";"));
+				String imgBase64 = contents[i].substring(contents[i].indexOf(";")+"base64,".length()+1);
+				String imgPath = FileKit.imgFromBase64(imgBase64, filename, name,suffix);
+				contents[i] = contents[i].replace(contents[i].substring(0), imgPath);
+			}
+			sb.append(contents[i].trim());
+		}
+		return sb.toString();
 	}
 }

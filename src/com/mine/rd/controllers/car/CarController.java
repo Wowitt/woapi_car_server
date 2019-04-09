@@ -407,4 +407,288 @@ public class CarController extends BaseController{
 		}
 		renderJsonForCors();
 	}
+	
+	/**
+	 * @author woody
+	 * @date 20190323
+	 * 方法：校验顾客是否重复
+	 */
+	public void checkCustomerRepeat(){
+		logger.info("校验顾客是否重复");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("校验顾客是否重复异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190323
+	 * 方法：保存客户信息
+	 */
+	public void saveCustomer(){
+		logger.info("保存客户信息");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("保存客户信息异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190323
+	 * 方法：销售app初始化
+	 */
+	public void saleAppInit(){
+		logger.info("销售app初始化");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("销售app初始化异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190323
+	 * 方法：签约
+	 */
+	public void sign(){
+		logger.info("签约");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("签约异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190323
+	 * 方法：合同列表
+	 */
+	public void contractList(){
+		logger.info("合同列表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("合同列表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190323
+	 * 方法：获取合同信息
+	 */
+	public void getContract(){
+		logger.info("获取合同信息");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("获取合同信息异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190323
+	 * 方法：合同详情初始化数据
+	 */
+	public void contractDetailInit(){
+		logger.info("合同详情初始化数据");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("合同详情初始化数据异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190323
+	 * 方法：更新合同
+	 */
+	public void saveContract(){
+		logger.info("更新合同");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("更新合同异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190323
+	 * 方法：合同WEB端详情初始化数据
+	 */
+	public void contractDetailWebInit(){
+		logger.info("合同WEB详情初始化数据");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("合同WEB详情初始化数据异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190323
+	 * 方法：更新合同财务
+	 */
+	public void saveContractFinance(){
+		logger.info("更新合同财务");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("更新合同财务异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190323
+	 * 方法：更新合同车管部门
+	 */
+	public void saveContractCarManage(){
+		logger.info("更新合同车管部门");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("更新合同车管部门异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190323
+	 * 方法：更新合同交车
+	 */
+	public void saveContractDeliver(){
+		logger.info("更新合同交车");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("更新合同交车异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190323
+	 * 方法：检查车辆
+	 */
+	public void saveContractCheckImg(){
+		logger.info("检查车辆");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("检查车辆异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	/**
+	 * @author woody
+	 * @date 20190323
+	 * 方法：初始化检查车辆
+	 */
+	public void initContractCheckImg(){
+		logger.info("检查车辆");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("初始化检查车辆异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190323
+	 * 方法：保存车辆共享池
+	 */
+	public void saveCarShare(){
+		logger.info("保存车辆共享池");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("保存车辆共享池异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
 }

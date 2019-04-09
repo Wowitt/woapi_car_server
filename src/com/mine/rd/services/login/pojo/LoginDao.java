@@ -33,6 +33,12 @@ public class LoginDao extends BaseDao {
 			map.put("userPortrait", record.get("PORTRAIT"));
 			map.put("status", record.get("STATUS"));
 			map.put("roleId", record.get("ROLE_ID"));
+			List<Record> records = Db.find("select * from WOBO_USERROLE where user_id = ?" ,username);
+			String roleIds = "";
+			for(Record tmp : records){
+				roleIds += tmp.get("ROLE_ID").toString()+";";
+			}
+			map.put("roleIds", roleIds);
 		}
 		return map;
 	}

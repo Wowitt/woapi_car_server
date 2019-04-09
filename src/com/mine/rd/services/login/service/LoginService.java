@@ -67,6 +67,7 @@ public class LoginService extends BaseService {
 				String userPortrait = "";
 				controller.setMySession("userId",user.get("userId"));
 				controller.setMySession("roleId",user.get("roleId"));
+				controller.setMySession("roleIds",user.get("roleIds"));
 				controller.setMySession("nickName",user.get("nickName"));
 				controller.setMySession("userName",user.get("name"));
 				controller.setMySession("ifLogin","0");

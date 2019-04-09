@@ -22,6 +22,23 @@ public class CarDao extends BaseDao {
 		return record != null ? record.getColumns() : null;
 	}
 	
+	public Map<String,Object> querybyPlateNumForRepair(String plateNum){
+		Record record = Db.findFirst("select a.* from C_WOBO_CAR a where a.plate_Num = ?",plateNum);
+		Record contract = Db.findFirst("select * from C_WOBO_CONTRACT a where a.CAR_PLATE_NUM = ? and STATUS = '1' order by DELIVER_DATE desc",plateNum);
+		if(contract != null){
+			record.set("CU_TYPE", contract.get("CU_TYPE"));
+			record.set("CU_NAME", contract.get("CU_NAME"));
+			record.set("CU_PHONE", contract.get("CU_PHONE"));
+			record.set("CU_EP_NAME", contract.get("CU_EP_NAME"));
+			record.set("CONTRACT_ID", contract.get("ID"));
+			record.set("CONTRACT_TYPE", contract.get("TYPE"));
+			record.set("CONTRACT_NAME", contract.get("CONTRACT_NAME"));
+			record.set("SALE_USER_ID", contract.get("SALE_USER_ID"));
+			record.set("SALE_USER_NAME", contract.get("SALE_USER_NAME"));
+		}
+		return record != null ? record.getColumns() : null;
+	}
+	
 	public int updateCarFieldInfo(String carId,String fieldId,String fieldName){
 		return Db.update("update C_WOBO_CAR set FIELD_ID = ? , FIELD_NAME = ? where ID = ? ",fieldId,fieldName,carId);
 	}
@@ -298,6 +315,41 @@ public class CarDao extends BaseDao {
 	
 	/**
 	 * @author woody
+	 * @date 20190403
+	 * 方法：合同列表
+	 */
+	public Map<String, Object> contractList(int pn, int ps, Object searchContent){
+		String sql = "from C_WOBO_CONTRACT A where A.status != '2'  ";
+		if(searchContent != null && !"".equals(searchContent)){
+			sql = sql + " and (A.CU_NAME like '%"+searchContent+"%' or A.ID like '%"+searchContent+"%' or A.CU_EP_NAME like '%"+searchContent+"%' or A.CAR_PLATE_NUM like '%"+searchContent+"%' or A.TYPE like '%"+searchContent+"%' or A.STATUSNAME like '%"+searchContent+"%'  ) ";
+		}
+		
+		Page<Record> page = Db.paginate(pn, ps, "select A.*  ", sql );
+		List<Record> eps = page.getList();
+		List<Map<String, Object>> epList = new ArrayList<>();
+		Map<String, Object> resMap = new HashMap<>();
+		if(eps != null){
+			for(Record record : eps){
+				Map<String, Object> map = new HashMap<>();
+				map.put("ID", record.get("ID"));
+				map.put("CU_NAME", record.get("CU_NAME"));
+				map.put("CU_TYPE", record.get("CU_TYPE"));
+				map.put("CU_PHONE", record.get("CU_PHONE"));
+				map.put("CU_EP_NAME", record.get("CU_EP_NAME"));
+				map.put("TYPE" ,record.get("TYPE"));
+				map.put("CAR_PLATE_NUM" ,record.get("CAR_PLATE_NUM"));
+				map.put("STATUSNAME", record.get("STATUSNAME"));
+				epList.add(map);
+			}
+		}
+		resMap.put("dataList", epList);
+		resMap.put("totalPage", page.getTotalPage());
+		resMap.put("totalRow", page.getTotalRow());
+		return resMap;
+	}
+	
+	/**
+	 * @author woody
 	 * @date 20180902
 	 * 方法：车辆列表
 	 */
@@ -410,7 +462,11 @@ public class CarDao extends BaseDao {
 		Record record = new Record();
 		record.set("ID", id);
 		record.set("CAR_ID", repairData.get("carId"));
-		record.set("CONTRACT_ID", repairData.get("contractId") != null ? repairData.get("contractId") : "");
+		record.set("CONTRACT_ID", repairData.get("CONTRACT_ID") != null ? repairData.get("CONTRACT_ID") : "");
+		record.set("CONTRACT_NAME", repairData.get("CONTRACT_NAME") != null ? repairData.get("CONTRACT_NAME") : "");
+		record.set("EP_NAME", repairData.get("CU_EP_NAME") != null ? repairData.get("CU_EP_NAME") : "");
+		record.set("CU_NAME", repairData.get("CU_NAME") != null ? repairData.get("CU_NAME") : "");
+		record.set("CU_PHONE", repairData.get("CU_PHONE") != null ? repairData.get("CU_PHONE") : "");
 		record.set("PLATE_NUM", repairData.get("plateNum"));
 		record.set("ENGINE_NUMBER", repairData.get("engineNumber"));
 		record.set("CAR_STATUSNAME", repairData.get("statusname"));
@@ -420,7 +476,6 @@ public class CarDao extends BaseDao {
 		record.set("PAYMENTTYPE", repairData.get("paymentType"));
 		record.set("COMPANY_ID", companyData.get("ID") !=null ? companyData.get("ID") : "");
 		record.set("COMPANY_NAME", companyData.get("NAME") !=null ? companyData.get("NAME") : "");
-		record.set("CUSTOMER_ID", repairData.get("customerId") != null ? repairData.get("customerId")  : "");
 		record.set("begindate", getSysdate());
 		record.set("sysdate", getSysdate());
 		boolean flag = false;
@@ -506,5 +561,356 @@ public class CarDao extends BaseDao {
 	public int delComponentItem(String repairId,String sonId){
 		int resInt = Db.update("delete from C_WOBO_REPAIR_LIST where re_id = ? and id=? ",repairId,sonId);
 		return resInt;
+	}
+	
+	public Map<String,Object> checkCustomerWillRepeat(String name,String phone){
+		Record record = Db.findFirst("select * from C_WOBO_CUSTOMER_WILL where name = ? and phone = ? and status = '1' ",name,phone);
+		return record != null ? record.getColumns() : null;
+	}
+	
+	public Map<String,Object> checkCustomerRepeat(String name,String phone){
+		Record record = Db.findFirst("select * from C_WOBO_CUSTOMER where name = ? and phone = ? and status = '1' ",name,phone);
+		return record != null ? record.getColumns() : null;
+	}
+	
+	public Map<String,Object> getCustomerWill(String id){
+		Record record = Db.findFirst("select * from C_WOBO_CUSTOMER_WILL where id = ? and status = '1' ",id);
+		return record != null ? record.getColumns() : null;
+	}
+	
+	public boolean addCustomerWill(Map<String,Object> map){
+		Record record = new Record();
+		String id = getSeqId("C_WOBO_CUSTOMER");
+		map.put("ID", id);
+		record.set("ID", getSeqId("C_WOBO_CUSTOMER"));
+		record.set("NAME", map.get("NAME"));
+		record.set("PERSON_CODE", map.get("PERSON_CODE"));
+		record.set("PERSON_ADDRESS", map.get("PERSON_ADDRESS"));
+		record.set("PHONE", map.get("PHONE"));
+		record.set("WORK", map.get("WORK"));
+		record.set("SOURCE", map.get("SOURCE"));
+		record.set("WILL_GENDER", map.get("WILL_GENDER"));
+		record.set("WILL_AGE", map.get("WILL_AGE"));
+		record.set("WILL_INTENTION", map.get("WILL_INTENTION"));
+		record.set("WILL_ITH", map.get("WILL_ITH"));
+		record.set("PERSON_IMG", map.get("PERSON_IMG"));
+		record.set("PERSON_ONLY_IMG", map.get("PERSON_ONLY_IMG"));
+		record.set("BUSINESS_LICENSE_IMG", map.get("BUSINESS_LICENSE_IMG"));
+		record.set("ENTRUST_IMG", map.get("ENTRUST_IMG"));
+		record.set("EP_NAME", map.get("EP_NAME"));
+		record.set("EP_ADDRESS", map.get("EP_ADDRESS"));
+		record.set("EP_CODE", map.get("EP_CODE"));
+		if(map.get("EP_NAME") != null && !"".equals(map.get("EP_NAME"))){
+			record.set("TYPE", "1");
+		}else{
+			record.set("TYPE", "0");
+		}
+		record.set("EMERGENCY_PERSON", map.get("EMERGENCY_PERSON"));
+		record.set("EMERGENCY_PHONE", map.get("EMERGENCY_PHONE"));
+		record.set("SALE_USER_ID", map.get("SALE_USER_ID"));
+		record.set("SALE_USER_NAME", map.get("SALE_USER_NAME"));
+		record.set("STATUS", "1");
+		record.set("sysdate", getSysdate());
+		record.set("REGISTER_DATE", getSysdate());
+		return Db.save("C_WOBO_CUSTOMER_WILL", record);
+	}
+	
+	public boolean addCustomer(Map<String,Object> map){
+		Record record = new Record();
+		String id = getSeqId("C_WOBO_CUSTOMER");
+		map.put("ID", id);
+		record.set("ID", map.get("ID"));
+		record.set("NAME", map.get("NAME"));
+		record.set("PERSON_CODE", map.get("PERSON_CODE"));
+		record.set("PERSON_ADDRESS", map.get("PERSON_ADDRESS"));
+		record.set("PHONE", map.get("PHONE"));
+		record.set("WORK", map.get("WORK"));
+		record.set("SOURCE", map.get("SOURCE"));
+		record.set("WILL_GENDER", map.get("WILL_GENDER"));
+		record.set("WILL_AGE", map.get("WILL_AGE"));
+		record.set("WILL_INTENTION", map.get("WILL_INTENTION"));
+		record.set("WILL_ITH", map.get("WILL_ITH"));
+		record.set("PERSON_IMG", map.get("PERSON_IMG"));
+		record.set("PERSON_ONLY_IMG", map.get("PERSON_ONLY_IMG"));
+		record.set("BUSINESS_LICENSE_IMG", map.get("BUSINESS_LICENSE_IMG"));
+		record.set("ENTRUST_IMG", map.get("ENTRUST_IMG"));
+		record.set("EP_NAME", map.get("EP_NAME"));
+		record.set("EP_ADDRESS", map.get("EP_ADDRESS"));
+		record.set("EP_CODE", map.get("EP_CODE"));
+		if(map.get("EP_NAME") != null && !"".equals(map.get("EP_NAME"))){
+			record.set("TYPE", "1");
+		}else{
+			record.set("TYPE", "0");
+		}
+		record.set("EMERGENCY_PERSON", map.get("EMERGENCY_PERSON"));
+		record.set("EMERGENCY_PHONE", map.get("EMERGENCY_PHONE"));
+		record.set("SALE_USER_ID", map.get("SALE_USER_ID"));
+		record.set("SALE_USER_NAME", map.get("SALE_USER_NAME"));
+		record.set("STATUS", "1");
+		record.set("sysdate", getSysdate());
+		record.set("REGISTER_DATE", getSysdate());
+		return Db.save("C_WOBO_CUSTOMER_WILL", record);
+	}
+	
+	public boolean updateCustomerWill(Map<String,Object> map){
+		Record record = new Record();
+		record.set("ID", map.get("ID"));
+		record.set("NAME", map.get("NAME"));
+		record.set("PERSON_CODE", map.get("PERSON_CODE"));
+		record.set("PERSON_ADDRESS", map.get("PERSON_ADDRESS"));
+		record.set("PHONE", map.get("PHONE"));
+		record.set("WORK", map.get("WORK"));
+		record.set("SOURCE", map.get("SOURCE"));
+		record.set("WILL_GENDER", map.get("WILL_GENDER"));
+		record.set("WILL_AGE", map.get("WILL_AGE"));
+		record.set("WILL_INTENTION", map.get("WILL_INTENTION"));
+		record.set("WILL_ITH", map.get("WILL_ITH"));
+		record.set("PERSON_IMG", map.get("PERSON_IMG"));
+		record.set("PERSON_ONLY_IMG", map.get("PERSON_ONLY_IMG"));
+		record.set("BUSINESS_LICENSE_IMG", map.get("BUSINESS_LICENSE_IMG"));
+		record.set("ENTRUST_IMG", map.get("ENTRUST_IMG"));
+		record.set("EP_NAME", map.get("EP_NAME"));
+		record.set("EP_ADDRESS", map.get("EP_ADDRESS"));
+		record.set("EP_CODE", map.get("EP_CODE"));
+		if(map.get("EP_NAME") != null && !"".equals(map.get("EP_NAME"))){
+			record.set("TYPE", "1");
+		}else{
+			record.set("TYPE", "0");
+		}
+		record.set("EMERGENCY_PERSON", map.get("EMERGENCY_PERSON"));
+		record.set("EMERGENCY_PHONE", map.get("EMERGENCY_PHONE"));
+		return Db.update("C_WOBO_CUSTOMER_WILL", "ID",record);
+	}
+	
+	public boolean updateCustomer(Map<String,Object> map){
+		Record record = new Record();
+		record.set("ID", map.get("ID"));
+		record.set("NAME", map.get("NAME"));
+		record.set("PERSON_CODE", map.get("PERSON_CODE"));
+		record.set("PERSON_ADDRESS", map.get("PERSON_ADDRESS"));
+		record.set("PHONE", map.get("PHONE"));
+		record.set("WORK", map.get("WORK"));
+		record.set("SOURCE", map.get("SOURCE"));
+		record.set("WILL_GENDER", map.get("WILL_GENDER"));
+		record.set("WILL_AGE", map.get("WILL_AGE"));
+		record.set("WILL_INTENTION", map.get("WILL_INTENTION"));
+		record.set("WILL_ITH", map.get("WILL_ITH"));
+		record.set("PERSON_IMG", map.get("PERSON_IMG"));
+		record.set("PERSON_ONLY_IMG", map.get("PERSON_ONLY_IMG"));
+		record.set("BUSINESS_LICENSE_IMG", map.get("BUSINESS_LICENSE_IMG"));
+		record.set("ENTRUST_IMG", map.get("ENTRUST_IMG"));
+		record.set("EP_NAME", map.get("EP_NAME"));
+		record.set("EP_ADDRESS", map.get("EP_ADDRESS"));
+		record.set("EP_CODE", map.get("EP_CODE"));
+		if(map.get("EP_NAME") != null && !"".equals(map.get("EP_NAME"))){
+			record.set("TYPE", "1");
+		}else{
+			record.set("TYPE", "0");
+		}
+		record.set("EMERGENCY_PERSON", map.get("EMERGENCY_PERSON"));
+		record.set("EMERGENCY_PHONE", map.get("EMERGENCY_PHONE"));
+		return Db.update("C_WOBO_CUSTOMER", "ID",record);
+	}
+	
+	public List<Map<String,Object>> querySelectList(String id){
+		List<Record> list = Db.find("select * from pub_select where id = ? order by sort ",id);
+		List<Map<String, Object>> resList = new ArrayList<>();
+		for(Record record : list){
+			resList.add(record.getColumns());
+		}
+		return resList;
+	}
+	
+	public void customerInfoTransfer(String id){
+		int res = Db.update("insert into C_WOBO_CUSTOMER select  * from C_WOBO_CUSTOMER_will where id = ? ",id);
+		if(res > 0){
+			Db.update("delete from C_WOBO_CUSTOMER_will where id = ? ",id);
+		}
+	}
+	
+	public boolean addContract(Map<String,Object> map){
+		Record record = new Record();
+		String id = getSeqId("C_WOBO_CONTRACT");
+		record.set("ID",id);
+		record.set("CU_ID", map.get("ID"));
+		if(map.get("EP_NAME") != null && !"".equals(map.get("EP_NAME"))){
+			record.set("CU_TYPE", "1");
+		}else{
+			record.set("CU_TYPE", "0");
+		}
+		record.set("CU_NAME", map.get("NAME"));
+		record.set("CU_PERSON_CODE", map.get("PERSON_CODE"));
+		record.set("CU_PERSON_ADDRESS", map.get("PERSON_ADDRESS"));
+		record.set("CU_PHONE", map.get("PHONE"));
+		record.set("CU_WORK", map.get("WORK"));
+		record.set("CU_SOURCE", map.get("SOURCE"));
+		record.set("CU_EP_NAME", map.get("EP_NAME"));
+		record.set("CU_EP_ADDRESS", map.get("EP_ADDRESS"));
+		record.set("CU_EP_CODE", map.get("EP_CODE"));
+		record.set("CU_EMERGENCY_PERSON", map.get("EMERGENCY_PERSON"));
+		record.set("CU_EMERGENCY_PHONE", map.get("EMERGENCY_PHONE"));
+		record.set("CU_BUSINESS_LICENSE_IMG", map.get("BUSINESS_LICENSE_IMG"));
+		record.set("CU_PERSON_IMG", map.get("PERSON_IMG"));
+		record.set("CU_PERSON_ONLY_IMG", map.get("PERSON_ONLY_IMG"));
+		record.set("CU_ENTRUST_IMG", map.get("ENTRUST_IMG"));
+		record.set("SALE_USER_ID", map.get("SALE_USER_ID"));
+		record.set("SALE_USER_NAME", map.get("SALE_USER_NAME"));
+		record.set("STATUS", "1");
+		record.set("STATUSNAME", "保存");
+		record.set("sysdate", getSysdate());
+		return Db.save("C_WOBO_CONTRACT", record);
+	}
+	
+	public Map<String,Object> getContract(String id){
+		Record record = Db.findFirst("select * from C_WOBO_CONTRACT where id = ? ",id);
+		return record != null ? record.getColumns() : null;
+	}
+	
+	public Map<String,Object> getContractFinance(String id){
+		Record record = Db.findFirst("select * from C_WOBO_CONTRACT_FINANCE where id = ? ",id);
+		return record != null ? record.getColumns() : null;
+	}
+	
+	public Map<String,Object> getContractCarManage(String id){
+		Record record = Db.findFirst("select * from C_WOBO_CONTRACT_CAR_MANAGE where id = ? ",id);
+		return record != null ? record.getColumns() : null;
+	}
+	
+	public Map<String,Object> contractDeliver(String id){
+		Record record = Db.findFirst("select * from C_WOBO_CONTRACT_DELIVER where id = ? ",id);
+		return record != null ? record.getColumns() : null;
+	}
+	
+	public List<Map<String,Object>> querySelectCarList(){
+		List<Record> list = Db.find("select a.* from C_WOBO_CAR a, C_WOBO_CAR_SHARE b where a.id = b.car_id ");
+		List<Map<String, Object>> resList = new ArrayList<>();
+		for(Record record : list){
+			resList.add(record.getColumns());
+		}
+		return resList;
+	}
+	
+	public boolean updateContract(Map<String,Object> map){
+		Record record = new Record();
+		record.set("ID", map.get("ID"));
+		record.set("CONTRACT_NAME", map.get("CONTRACT_NAME"));
+		record.set("TYPE", map.get("TYPE"));
+		record.set("CAR_PLATE_NUM", map.get("CAR_PLATE_NUM"));
+		record.set("CAR_FRAME_NUMBER", map.get("CAR_FRAME_NUMBER"));
+		record.set("CAR_MODEL", map.get("CAR_MODEL"));
+		record.set("CAR_ENGINE_NUMBER", map.get("CAR_ENGINE_NUMBER"));
+		record.set("CAR_ID", map.get("CAR_ID"));
+		record.set("CAR_PROP", map.get("CAR_PROP"));
+		record.set("CAR_DRIVER_DATE", map.get("CAR_DRIVER_DATE"));
+		record.set("CAR_DRIVER_MONTH", map.get("CAR_DRIVER_MONTH"));
+		record.set("CAR_DRIVER_YEAR", map.get("CAR_DRIVER_YEAR"));
+		record.set("INSUREANCE", map.get("INSUREANCE"));
+		record.set("CAR_DRIVER_NUM", map.get("CAR_DRIVER_NUM"));
+		record.set("NUM", map.get("NUM"));
+		record.set("UNIT_PRICE", map.get("UNIT_PRICE"));
+		record.set("UNIT_PRICE_SUM", map.get("UNIT_PRICE_SUM"));
+		record.set("INVOICE", map.get("INVOICE"));
+		record.set("SIGN_DATE", map.get("SIGN_DATE"));
+		record.set("DELIVER_DATE", map.get("DELIVER_DATE"));
+		record.set("REMARK", map.get("REMARK"));
+		return Db.update("C_WOBO_CONTRACT", "ID",record);
+	}
+	
+	public int updateCarDriverNum(String id,String driver_num){
+		int res = Db.update("update c_wobo_car set DRIVER_NUM = ? where id = ? ",driver_num,id);
+		return res;
+	}
+	
+	public boolean saveContractFinance(Map<String,Object> map){
+		Db.update("delete from C_WOBO_CONTRACT_FINANCE where id = ? ",map.get("ID"));
+		Record record = new Record();
+		record.set("ID", map.get("ID"));
+		record.set("IF_CONTRACT", map.get("IF_CONTRACT"));
+		record.set("CONTRACT_PERIOD", map.get("CONTRACT_PERIOD"));
+		record.set("PAY_PERIOD", map.get("PAY_PERIOD"));
+		record.set("AGENT", map.get("AGENT"));
+		record.set("EARNEST_MONEY", map.get("EARNEST_MONEY"));
+		if(map.get("EARNEST_DATE") != null && !"".equals( map.get("EARNEST_DATE"))){
+			record.set("EARNEST_DATE", map.get("EARNEST_DATE"));
+		}
+		record.set("EARNEST_RECEIPT", map.get("EARNEST_RECEIPT"));
+		record.set("EARNEST_PAYTYPE", map.get("EARNEST_PAYTYPE"));
+		record.set("MONEY", map.get("MONEY"));
+		if(map.get("PAY_DATE") != null && !"".equals( map.get("PAY_DATE"))){
+			record.set("PAY_DATE", map.get("PAY_DATE"));
+		}
+		record.set("PAY_RECEIPT", map.get("PAY_RECEIPT"));
+		record.set("PAY_TYPE", map.get("PAY_TYPE"));
+		record.set("STATUS", map.get("STATUS"));
+		record.set("USER_ID", map.get("USER_ID"));
+		record.set("USER_NAME", map.get("USER_NAME"));
+		record.set("sysdate", getSysdate());
+		return Db.save("C_WOBO_CONTRACT_FINANCE",record);
+	}
+	
+	public boolean saveContractCarManage(Map<String,Object> map){
+		Db.update("delete from C_WOBO_CONTRACT_CAR_MANAGE where id = ? ",map.get("ID"));
+		Record record = new Record();
+		record.set("ID", map.get("ID"));
+		record.set("DRIVING_LICENSE", map.get("DRIVING_LICENSE"));
+		record.set("MAINTENANCE_SIGN", map.get("MAINTENANCE_SIGN"));
+		record.set("CAR_KEY", map.get("CAR_KEY"));
+		record.set("CAR_KEY_NUM", map.get("CAR_KEY_NUM"));
+		record.set("STATUS", map.get("STATUS"));
+		record.set("USER_ID", map.get("USER_ID"));
+		record.set("USER_NAME", map.get("USER_NAME"));
+		record.set("sysdate", getSysdate());
+		return Db.save("C_WOBO_CONTRACT_CAR_MANAGE",record);
+	}
+	
+	public boolean saveContractDeliver(Map<String,Object> map){
+		Db.update("delete from C_WOBO_CONTRACT_DELIVER where id = ? ",map.get("ID"));
+		Record record = new Record();
+		record.set("ID", map.get("ID"));
+		record.set("INSURANCE", map.get("INSURANCE"));
+		record.set("CHARGE_GUN", map.get("CHARGE_GUN"));
+		record.set("TOOL_KIT", map.get("TOOL_KIT"));
+		record.set("TRIPOD", map.get("TRIPOD"));
+		record.set("FIRE_EXTINGUISHER", map.get("FIRE_EXTINGUISHER"));
+		record.set("YEAR_CHECK_FLAG", map.get("YEAR_CHECK_FLAG"));
+		record.set("MAINTENANCE", map.get("MAINTENANCE"));
+		record.set("STATUS", map.get("STATUS"));
+		record.set("USER_ID", map.get("USER_ID"));
+		record.set("USER_NAME", map.get("USER_NAME"));
+		record.set("sysdate", getSysdate());
+		return Db.save("C_WOBO_CONTRACT_DELIVER",record);
+	}
+	
+	public boolean saveCheckCar(String id,List<Map<String,Object>> list,String type){
+		Db.update("delete from C_WOBO_CONTRACT_CHECKIMG where id = ? and type = ? ",id,type);
+		boolean flag = true;
+		for(int i = 0 ; i < list.size() ; i++){
+			Record record = new Record();
+			record.set("ID", id);
+			record.set("SON_ID", i+1);
+			record.set("TYPE", list.get(i).get("TYPE"));
+			record.set("CONTENT", list.get(i).get("CONTENT"));
+			record.set("IMG", list.get(i).get("IMG"));
+			Db.save("C_WOBO_CONTRACT_CHECKIMG", record);
+		}
+		return flag;
+	}
+	
+	public List<Map<String,Object>> initContractCheckImg(String id,String type){
+		List<Record> list = Db.find("select * from C_WOBO_CONTRACT_CHECKIMG where id = ? and type = ? ",id,type);
+		List<Map<String, Object>> resList = new ArrayList<>();
+		for(Record record : list){
+			resList.add(record.getColumns());
+		}
+		return resList;
+	}
+	
+	public boolean saveCarShare(String carId,String plateNum){
+		Db.update("delete from C_WOBO_CAR_SHARE where CAR_ID = ? and PLATE_NUM = ?",carId,plateNum);
+		Record record = new Record();
+		record.set("CAR_ID", carId);
+		record.set("PLATE_NUM", plateNum);
+		record.set("actiondate",getSysdate());
+		return Db.save("C_WOBO_CAR_SHARE", record);
 	}
 }
