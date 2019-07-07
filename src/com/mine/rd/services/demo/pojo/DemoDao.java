@@ -1,6 +1,8 @@
 package com.mine.rd.services.demo.pojo;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -237,5 +239,40 @@ public class DemoDao extends BaseDao{
 			}
 		}
 		return handleModeCode;
+	}
+	
+	public List<Map<String,Object>> carparkList(String fieldId){
+		List<Map<String,Object>> reslist = new ArrayList<Map<String,Object>>();
+		List<Record> list = Db.find("select * from c_wobo_carpark where field_id = ? ",fieldId);
+		for(int i = 0 ; i < list.size(); i++){
+			if(list.get(i).get("actiondate") != null){
+				list.get(i).set("showdate", list.get(i).getDate("actiondate").toString().substring(0, list.get(i).getDate("actiondate").toString().indexOf(".")));
+			}
+			reslist.add(list.get(i).getColumns());
+		}
+		return reslist;
+	}
+	
+	public List<Map<String,Object>> testList(){
+		List<Map<String,Object>> reslist = new ArrayList<Map<String,Object>>();
+		List<Record> list = Db.find("select * from test ");
+		List<Map<String,Object>> son = new ArrayList<Map<String,Object>>();
+		Map<String,Object> one = new HashMap<String,Object>();
+		one.put("key1", "a");
+		Map<String,Object> two = new HashMap<String,Object>();
+		two.put("key2", "b");
+		son.add(one);
+		son.add(two);
+		for(int i = 0 ; i < list.size(); i++){
+			list.get(i).set("son", son);
+			reslist.add(list.get(i).getColumns());
+		}
+		return reslist;
+	}
+	
+	public void savetest2(String p){
+		Record record = new Record();
+		record.set("ttt", p);
+		Db.save("test2", record);
 	}
 }

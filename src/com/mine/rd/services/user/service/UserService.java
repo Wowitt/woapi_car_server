@@ -32,7 +32,7 @@ public class UserService extends BaseService {
 		dao.logout(sessionId);
 		CacheKit.remove("mySession", sessionId);
 		controller.setAttr("resFlag","0");
-		controller.setAttr("msg","注销成功！");
+		controller.setAttr("msg","退出成功!");
 	}
 	
 	private void wsClose(String userId_param) throws Exception{

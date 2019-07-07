@@ -99,6 +99,89 @@ public class CarService extends BaseService{
 		            	initContractCheckImg();
 		            }else if("saveCarShare".equals(getLastMethodName(7))){
 		            	saveCarShare();
+		            }else if("saveFinanceFlow".equals(getLastMethodName(7))){
+		            	saveFinanceFlow();
+		            }else if("queryFinanceFlowList".equals(getLastMethodName(7))){
+		            	queryFinanceFlowList();
+		            }else if("delFinanceFlow".equals(getLastMethodName(7))){
+		            	delFinanceFlow();
+		            }else if("queryCarTable".equals(getLastMethodName(7))){
+		            	queryCarTable();
+		            }else if("saveCarTable".equals(getLastMethodName(7))){
+		            	saveCarTable();
+		            }else if("delCarTable".equals(getLastMethodName(7))){
+		            	delCarTable();
+		            }else if("saveCarTableDeliver".equals(getLastMethodName(7))){
+		            	saveCarTableDeliver();
+		            }else if("contractUnfinishList".equals(getLastMethodName(7))){
+		            	contractUnfinishList();
+		            }else if("saveCarTableOne".equals(getLastMethodName(7))){
+		            	saveCarTableOne();
+		            }else if("queryAndCarTablebyCardno".equals(getLastMethodName(7))){
+		            	queryAndCarTablebyCardno();
+		            }
+		            else if("customerList".equals(getLastMethodName(7))){
+		            	customerList();
+		            }
+		            else if("carparkList".equals(getLastMethodName(7))){
+		            	carparkList();
+		            }
+		            else if("savecarpark".equals(getLastMethodName(7))){
+		            	savecarpark();
+		            }
+		            else if("carListForYearCheck".equals(getLastMethodName(7))){
+		            	carListForYearCheck();
+		            }
+		            else if("updateCarDriverYear".equals(getLastMethodName(7))){
+		            	updateCarDriverYear();
+		            }
+		            else if("updateInsureance".equals(getLastMethodName(7))){
+		            	updateInsureance();
+		            }
+		            else if("saveBreakRules".equals(getLastMethodName(7))){
+		            	saveBreakRules();
+		            }
+		            else if("breakrulesList".equals(getLastMethodName(7))){
+		            	breakrulesList();
+		            }
+		            else if("initFinanceFlow".equals(getLastMethodName(7))){
+		            	initFinanceFlow();
+		            }
+		            else if("queryCarTableBack".equals(getLastMethodName(7))){
+		            	queryCarTableBack();
+		            }
+		            else if("saveCarTableBack".equals(getLastMethodName(7))){
+		            	saveCarTableBack();
+		            }
+		            else if("saveContractBack".equals(getLastMethodName(7))){
+		            	saveContractBack();
+		            }
+		            else if("updateContractForBack".equals(getLastMethodName(7))){
+		            	updateContractForBack();
+		            }
+		            else if("contractForReplaceCarList".equals(getLastMethodName(7))){
+		            	contractForReplaceCarList();
+		            }
+		            else if("startReplaceCar".equals(getLastMethodName(7))){
+		            	startReplaceCar();
+		            }
+		            else if("replaceCarList".equals(getLastMethodName(7))){
+		            	replaceCarList();
+		            }
+		            else if("replaceCarInfo".equals(getLastMethodName(7))){
+		            	replaceCarInfo();
+		            }
+		            else if("saveReplaceOfRepair".equals(getLastMethodName(7))){
+		            	saveReplaceOfRepair();
+		            }
+		            else if("queryCarTableReplace".equals(getLastMethodName(7))){
+		            	queryCarTableReplace();
+		            }
+		            else if("saveCarTableReplace".equals(getLastMethodName(7))){
+		            	saveCarTableReplace();
+		            }
+		            else if("saveReplaceCarManage".equals(getLastMethodName(7))){
+		            	saveReplaceCarManage();
 		            }
 	            } catch (Exception e) {
 	                e.printStackTrace();
@@ -124,6 +207,25 @@ public class CarService extends BaseService{
 		long carCount = dao.getCarCount();
 		controller.setAttr("carCount",carCount);
 		controller.setAttr("resFlag", "0");
+	}
+	
+	private void queryAndCarTablebyCardno(){
+		String cardno = controller.getMyParam("cardno").toString();
+		String contractId = controller.getMyParam("contractId").toString();
+		Map<String,Object> car = dao.querybyCardno(cardno);
+		if(car != null){
+			String userId = controller.getMySession("userId") == null ? "" : controller.getMySession("userId").toString();
+			String userName = controller.getMySession("userName") == null ? "" : controller.getMySession("userName").toString();
+			car.put("ID", contractId);
+			car.put("PERSON_ID",userId);
+			car.put("PERSON_NAME",userName);
+			dao.saveCarTableOne(car);
+			controller.setAttr("car",car);
+			controller.setAttr("resFlag", "0");
+		}else{
+			controller.setAttr("msg","查不到车辆信息");
+			controller.setAttr("resFlag", "1");
+		}
 	}
 	
 	private void querybyCardno(){
@@ -333,13 +435,35 @@ public class CarService extends BaseService{
 	private void saveRepair(){
 		List<Map<String, Object>> components = controller.getMyParamList("components");
 		Map<String, Object> repairData = controller.getMyParamMap("repairData");
-		String repairId = dao.saveRepair(repairData);
+		Map<String, Object> financeFlow = controller.getMyParamMap("financeFlow");
+		String userId = controller.getMySession("userId") == null ? "" : controller.getMySession("userId").toString();
+		String userName = controller.getMySession("userName") == null ? "" : controller.getMySession("userName").toString();
+		if(!"".equals(financeFlow.get("PAYER_NAME")) && "".equals(repairData.get("CU_NAME"))){
+			Map<String, Object> c = new HashMap<String, Object>();
+			c.put("NAME", financeFlow.get("PAYER_NAME"));
+			c.put("PHONE", repairData.get("CU_PHONE"));
+			c.put("TYPE", "0");
+			c.put("SOURCE", "维修手动添加");
+			dao.addCustomerFromRepair(c);
+			repairData.put("CU_NAME", c.get("NAME"));
+			repairData.put("CU_PHONE", c.get("PHONE"));
+			financeFlow.put("PAYER_ID", c.get("ID"));
+		}
+		String repairId = dao.saveRepair(repairData);	
+		financeFlow.put("PERSON_ID", userId);
+		financeFlow.put("PERSON_NAME", userName);
+		financeFlow.put("BIZ_ID", repairId);
+		if(!"".equals(financeFlow.get("ID"))){
+			 dao.delFinanceFlow(financeFlow.get("ID").toString());
+		}
+		boolean saveFinanceFlag = dao.saveFinanceFlow(financeFlow);
 		if(!"".equals(repairId)){
 			components = dao.saveRepairList(components, repairId);
 		}
-		if(!"".equals(repairId) && components !=null){
+		if(!"".equals(repairId) && components !=null && saveFinanceFlag){
 			controller.setAttr("repairId", repairId);
 			controller.setAttr("componentList", components);
+			controller.setAttr("financeFlow", financeFlow);
 			controller.setAttr("resFlag", "0");
 			controller.setAttr("msg", "保存成功");
 		}else{
@@ -359,7 +483,9 @@ public class CarService extends BaseService{
 	private void queryRepair(){
 		String repairId = controller.getMyParam("repairId").toString();
 		controller.setAttr("repairData", dao.queryRepair(repairId));
+		controller.setAttr("financeFlow", dao.queryFinanceFlow(repairId).get(0));
 		controller.setAttr("detailListData", dao.queryRepairList(repairId));
+		controller.setAttr("companyPayModeList",dao.initCompanyPayMode());
 		controller.setAttr("resFlag", "0");
 		controller.setAttr("msg", "保存成功");
 	}
@@ -386,6 +512,8 @@ public class CarService extends BaseService{
 			if(map == null){
 				msg="该顾客是新顾客，请登记顾客信息";
 			}else{
+				List<Map<String,Object>> cuPricelist = dao.getCuPriceList(map.get("ID").toString());
+				controller.setAttr("cuPricelist", cuPricelist);
 				msg="该顾客已签约过,登记销售员是"+map.get("SALE_USER_NAME")+",登记时间是"+map.get("REGISTER_DATE").toString().substring(0,10);
 				controller.setAttr("willFlag", "0");
 			}
@@ -439,6 +567,7 @@ public class CarService extends BaseService{
 		map.put("WILL_AGE", controller.getMyParam("WILL_AGE"));
 		map.put("WILL_INTENTION", controller.getMyParam("WILL_INTENTION"));
 		map.put("WILL_ITH", controller.getMyParam("WILL_ITH"));
+		map.put("WILL_RENT_MONTH", controller.getMyParam("WILL_RENT_MONTH"));
 		map.put("EP_NAME", controller.getMyParam("EP_NAME"));
 		map.put("EP_ADDRESS", controller.getMyParam("EP_ADDRESS"));
 		map.put("EP_CODE", controller.getMyParam("EP_CODE"));
@@ -462,8 +591,10 @@ public class CarService extends BaseService{
 		String ENTRUST_IMG = "";
 		Map<String,Object> map = new HashMap<String,Object>();
 		pubCustomer(map, id, PERSON_ONLY_IMG, BUSINESS_LICENSE_IMG, ENTRUST_IMG, PERSON_IMG, userId, userName);
+		List<Map<String, Object>> gearList = controller.getMyParamList("gearList");
 		if("".equals(id)){
 			if(dao.addCustomerWill(map)){
+				dao.saveCuPrice(id, gearList);
 				controller.setAttr("userInfo", map);
 				controller.setAttr("resFlag", "0");
 				controller.setAttr("msg", "登记成功");
@@ -484,6 +615,7 @@ public class CarService extends BaseService{
 			}else{
 				flag = dao.updateCustomerWill(map);
 			}
+			dao.saveCuPrice(id, gearList);
 			if(flag){
 				controller.setAttr("userInfo", map);
 				controller.setAttr("resFlag", "0");
@@ -505,6 +637,8 @@ public class CarService extends BaseService{
 		controller.setAttr("sourceList",dao.querySelectList("source"));
 		controller.setAttr("intentionList",dao.querySelectList("intention"));
 		controller.setAttr("ithList",dao.querySelectList("ith"));
+		controller.setAttr("workList",dao.querySelectList("work"));
+		controller.setAttr("gearList",dao.queryGearList());
 		controller.setAttr("resFlag", "0");
 	}
 	
@@ -518,9 +652,11 @@ public class CarService extends BaseService{
 		String ENTRUST_IMG = "";
 		Map<String,Object> map = new HashMap<String,Object>();
 		pubCustomer(map, id, PERSON_ONLY_IMG, BUSINESS_LICENSE_IMG, ENTRUST_IMG, PERSON_IMG, userId, userName);
+		List<Map<String, Object>> gearList = controller.getMyParamList("gearList");
 		if("".equals(id)){
 			if(dao.addCustomer(map)){
 				if(dao.addContract(map)){
+					dao.saveCuCoPrice(id,map.get("contractId").toString(), gearList);
 					controller.setAttr("userInfo", map);
 					controller.setAttr("resFlag", "0");
 					controller.setAttr("msg", "签约成功");
@@ -549,6 +685,7 @@ public class CarService extends BaseService{
 				flag_contract = dao.addContract(map);
 				dao.customerInfoTransfer(id);
 			}
+			dao.saveCuCoPrice(id,map.get("contractId").toString(), gearList);
 			if(flag && flag_contract){
 				controller.setAttr("resFlag", "0");
 				controller.setAttr("msg", "签约成功");
@@ -574,14 +711,34 @@ public class CarService extends BaseService{
 		controller.setAttr("resFlag", "0");
 	}
 	
+	private void contractForReplaceCarList(){
+		pn = Integer.parseInt(controller.getMyParam("pn").toString());
+		ps = Integer.parseInt(controller.getMyParam("ps").toString());
+		Object searchContent = controller.getMyParam("searchContent");
+		controller.setAttrs(dao.contractForReplaceCarList(pn, ps,searchContent));
+		controller.setAttr("resFlag", "0");
+	}
+	
+	private void contractUnfinishList(){
+		pn = Integer.parseInt(controller.getMyParam("pn").toString());
+		ps = Integer.parseInt(controller.getMyParam("ps").toString());
+		Object searchContent = controller.getMyParam("searchContent");
+		controller.setAttrs(dao.contractList(pn, ps,searchContent));
+		controller.setAttr("resFlag", "0");
+	}
+	
 	private void getContract(){
 		String id = controller.getMyParam("id").toString();
 		Map<String,Object> map = dao.getContract(id);
 		if(map != null){
 			controller.setAttr("contract",map);
 			controller.setAttr("contractFinance",dao.getContractFinance(id));
-			controller.setAttr("contractCarManage",dao.getContractCarManage(id));
-			controller.setAttr("contractDeliver",dao.contractDeliver(id));
+			controller.setAttr("contractBack",dao.getContractBack(id));
+//			controller.setAttr("contractCarManage",dao.getContractCarManage(id));
+//			controller.setAttr("contractDeliver",dao.contractDeliver(id));
+			List<Map<String,Object>> cucoPricelist = dao.getCuCoPriceList(id);
+			controller.setAttr("cucoPricelist", cucoPricelist);
+			controller.setAttr("financeFlowList", dao.queryFinanceFlow(id));
 			controller.setAttr("resFlag", "0");
 		}else{
 			controller.setAttr("msg","查不到信息");
@@ -592,6 +749,8 @@ public class CarService extends BaseService{
 	private void contractDetailInit(){
 		controller.setAttr("typeList",dao.querySelectList("contract_type"));
 		controller.setAttr("priceList",dao.querySelectList("car_price"));
+		controller.setAttr("constractNameList",dao.querySelectList("constract_name"));
+		controller.setAttr("payPeriodList",dao.querySelectList("pay_period"));
 		controller.setAttr("carList",dao.querySelectCarList());
 		controller.setAttr("resFlag", "0");
 	}
@@ -599,11 +758,9 @@ public class CarService extends BaseService{
 	private void saveContract(){
 		Map<String, Object> map = controller.getMyParamMap("contract");
 		boolean flag = dao.updateContract(map);
-		int resInt = 0;
-		if(map.get("CAR_DRIVER_NUM") != null && !"".equals(map.get("CAR_DRIVER_NUM"))){
-			resInt = dao.updateCarDriverNum(map.get("CAR_ID").toString(), map.get("CAR_DRIVER_NUM").toString());
-		}
-		if(flag && resInt > 0){
+		List<Map<String, Object>> cucoPricelist = controller.getMyParamList("cucoPricelist");
+		dao.saveCuCoPrice(map.get("CU_ID").toString(),map.get("ID").toString(), cucoPricelist);
+		if(flag){
 			controller.setAttr("msg","保存成功");
 			controller.setAttr("resFlag", "0");
 		}else{
@@ -635,6 +792,24 @@ public class CarService extends BaseService{
 		}
 	}
 	
+	private void saveContractBack(){
+		String userId = controller.getMySession("userId") == null ? "" : controller.getMySession("userId").toString();
+		String userName = controller.getMySession("userName") == null ? "" : controller.getMySession("userName").toString();
+		Map<String, Object> map = controller.getMyParamMap("contractBack");
+		map.put("USER_ID", userId);
+		map.put("USER_NAME", userName);
+		map.put("STATUS", "1");
+		boolean flag = dao.saveContractBack(map);
+		if(flag){
+			controller.setAttr("map",map);
+			controller.setAttr("msg","保存成功");
+			controller.setAttr("resFlag", "0");
+		}else{
+			controller.setAttr("msg","保存失败");
+			controller.setAttr("resFlag", "1");
+		}
+	}
+	
 	private void saveContractCarManage(){
 		String userId = controller.getMySession("userId") == null ? "" : controller.getMySession("userId").toString();
 		String userName = controller.getMySession("userName") == null ? "" : controller.getMySession("userName").toString();
@@ -643,10 +818,26 @@ public class CarService extends BaseService{
 		map.put("USER_NAME", userName);
 		boolean flag = dao.saveContractCarManage(map);
 		if(flag){
-			controller.setAttr("msg","保存成功");
+			controller.setAttr("msg","提交成功");
 			controller.setAttr("resFlag", "0");
 		}else{
-			controller.setAttr("msg","保存失败");
+			controller.setAttr("msg","提交失败");
+			controller.setAttr("resFlag", "1");
+		}
+	}
+	
+	private void saveReplaceCarManage(){
+		String userId = controller.getMySession("userId") == null ? "" : controller.getMySession("userId").toString();
+		String userName = controller.getMySession("userName") == null ? "" : controller.getMySession("userName").toString();
+		Map<String, Object> map = controller.getMyParamMap("replaceCarManage");
+		map.put("USER_ID", userId);
+		map.put("USER_NAME", userName);
+		boolean flag = dao.saveReplaceCarManage(map);
+		if(flag){
+			controller.setAttr("msg","提交成功");
+			controller.setAttr("resFlag", "0");
+		}else{
+			controller.setAttr("msg","提交失败");
 			controller.setAttr("resFlag", "1");
 		}
 	}
@@ -659,10 +850,10 @@ public class CarService extends BaseService{
 		map.put("USER_NAME", userName);
 		boolean flag = dao.saveContractDeliver(map);
 		if(flag){
-			controller.setAttr("msg","保存成功");
+			controller.setAttr("msg","提交成功");
 			controller.setAttr("resFlag", "0");
 		}else{
-			controller.setAttr("msg","保存失败");
+			controller.setAttr("msg","提交失败");
 			controller.setAttr("resFlag", "1");
 		}
 	}
@@ -705,5 +896,285 @@ public class CarService extends BaseService{
 			controller.setAttr("msg","提车失败");
 			controller.setAttr("resFlag", "0");
 		};
+	}
+	
+	private void saveFinanceFlow(){
+		Map<String, Object> map = controller.getMyParamMap("parm");
+		String userId = controller.getMySession("userId") == null ? "" : controller.getMySession("userId").toString();
+		String userName = controller.getMySession("userName") == null ? "" : controller.getMySession("userName").toString();
+		map.put("PERSON_ID", userId);
+		map.put("PERSON_NAME", userName);
+		if(dao.saveFinanceFlow(map)){
+			controller.setAttr("msg","保存成功");
+			controller.setAttr("resFlag", "0");
+		}else{
+			controller.setAttr("msg","保存失败");
+			controller.setAttr("resFlag", "0");
+		};
+	}
+	
+	private void queryFinanceFlowList(){
+		String BIZ_ID = controller.getMyParam("id").toString();
+		controller.setAttr("dataList",dao.queryFinanceFlow(BIZ_ID));
+		controller.setAttr("resFlag", "0");
+	}
+	
+	private void queryCarTable(){
+		String id = controller.getMyParam("id").toString();
+		controller.setAttr("dataList",dao.queryCarTable(id));
+		controller.setAttr("resFlag", "0");
+	}
+	
+	private void queryCarTableReplace(){
+		String id = controller.getMyParam("id").toString();
+		controller.setAttr("dataList",dao.queryCarTableReplace(id));
+		controller.setAttr("resFlag", "0");
+	}
+	
+	private void queryCarTableBack(){
+		String id = controller.getMyParam("id").toString();
+		List<Map<String,Object>> resList = dao.queryCarTableBack(id) ;
+		if(resList == null || resList.size() < 1){
+			dao.initCarTableBack(id);
+			controller.setAttr("dataList",dao.queryCarTable(id));
+		}else{
+			controller.setAttr("dataList", resList);
+		}
+		controller.setAttr("resFlag", "0");
+	}
+	
+	private void delFinanceFlow(){
+		String id = controller.getMyParam("id").toString();
+		if(dao.delFinanceFlow(id) > 0){
+			controller.setAttr("resFlag", "0");
+		}
+	}
+	
+	private void saveCarTable(){
+		List<Map<String, Object>> list = controller.getMyParamList("list");
+		if(dao.saveCarTable(list) && dao.updateCarPart(list)){
+			controller.setAttr("msg","保存成功");
+			controller.setAttr("resFlag", "0");
+		}else{
+			controller.setAttr("msg","保存失败");
+			controller.setAttr("resFlag", "0");
+		};
+	}
+	
+	private void saveCarTableReplace(){
+		List<Map<String, Object>> list = controller.getMyParamList("list");
+		if(dao.saveCarTableReplace(list) && dao.updateCarPart(list)){
+			controller.setAttr("msg","保存成功");
+			controller.setAttr("resFlag", "0");
+		}else{
+			controller.setAttr("msg","保存失败");
+			controller.setAttr("resFlag", "0");
+		};
+	}
+	
+	private void saveCarTableBack(){
+		List<Map<String, Object>> list = controller.getMyParamList("list");
+		if(dao.saveCarTableBack(list) && dao.updateCarPart(list)){
+			controller.setAttr("msg","保存成功");
+			controller.setAttr("resFlag", "0");
+		}else{
+			controller.setAttr("msg","保存失败");
+			controller.setAttr("resFlag", "0");
+		};
+	}
+	
+	private void saveCarTableDeliver(){
+		List<Map<String, Object>> list = controller.getMyParamList("list");
+		if(dao.saveCarTableDeliver(list) && dao.updateCarPartDeliver(list)){
+			controller.setAttr("msg","保存成功");
+			controller.setAttr("resFlag", "0");
+		}else{
+			controller.setAttr("msg","保存失败");
+			controller.setAttr("resFlag", "0");
+		};
+	}
+	
+	private void delCarTable(){
+		if(dao.delCarTable(controller.getMyParamMap("obj"))){
+			controller.setAttr("msg","删除成功");
+			controller.setAttr("resFlag", "0");
+		}else{
+			controller.setAttr("msg","删除失败");
+			controller.setAttr("resFlag", "0");
+		};
+	}
+	
+	private void saveCarTableOne(){
+		Map<String, Object> map = controller.getMyParamMap("obj");
+		String userId = controller.getMySession("userId") == null ? "" : controller.getMySession("userId").toString();
+		String userName = controller.getMySession("userName") == null ? "" : controller.getMySession("userName").toString();
+		map.put("PERSON_ID", userId);
+		map.put("PERSON_NAME", userName);
+		if(dao.saveCarTableOne(map) && dao.updateCarOne(map)){
+			controller.setAttr("msg","保存成功");
+			controller.setAttr("resFlag", "0");
+		}else{
+			controller.setAttr("msg","保存失败");
+			controller.setAttr("resFlag", "0");
+		};
+	}
+	
+	private void customerList(){
+		pn = Integer.parseInt(controller.getMyParam("pn").toString());
+		ps = Integer.parseInt(controller.getMyParam("ps").toString());
+		String type = controller.getMyParam("type") == null ? "" : controller.getMyParam("type").toString();
+		Object searchContent = controller.getMyParam("searchContent");
+		controller.setAttrs("1".equals(type) ? dao.customerList(pn, ps,searchContent) : dao.customerwillList(pn, ps,searchContent));
+		controller.setAttr("resFlag", "0");
+	}
+	
+	private void carListForYearCheck(){
+		pn = Integer.parseInt(controller.getMyParam("pn").toString());
+		ps = Integer.parseInt(controller.getMyParam("ps").toString());
+		Object searchContent = controller.getMyParam("searchContent");
+		controller.setAttrs(dao.carListForYearCheck(pn, ps,searchContent));
+		controller.setAttr("resFlag", "0");
+	}
+	
+	private void carparkList(){
+		controller.setAttr("dataList",dao.carparkList());
+		controller.setAttr("resFlag", "0");
+	}
+	
+	private void savecarpark(){
+		List<Map<String, Object>> list = controller.getMyParamList("list");
+		controller.setAttr("dataList",dao.savecarpark(list));
+		controller.setAttr("msg","保存成功");
+		controller.setAttr("resFlag", "0");
+	}
+	
+	private void updateCarDriverYear(){
+		Map<String, Object> map = controller.getMyParamMap("obj");
+		if(dao.updateCarDriverYear(map)){
+			String userId = controller.getMySession("userId") == null ? "" : controller.getMySession("userId").toString();
+			String userName = controller.getMySession("userName") == null ? "" : controller.getMySession("userName").toString();
+			Map<String,Object> mapLog = new HashMap<String,Object>();
+			mapLog.put("fromPlatform", "web");
+			mapLog.put("content", userId+"|"+userName+"|" + map.get("ID") + "|" +map.get("PLATE_NUM") +"|"+map.get("DRIVER_YEAR"));
+			mapLog.put("BIZ_NAME", "更新车辆年检时间");
+			dao.addLogFlow(mapLog);
+			controller.setAttr("msg","保存成功");
+			controller.setAttr("resFlag", "0");
+		}else{
+			controller.setAttr("msg","保存失败");
+			controller.setAttr("resFlag", "0");
+		};
+	}
+	
+	private void updateInsureance(){
+		Map<String, Object> map = controller.getMyParamMap("obj");
+		if(dao.updateInsureance(map)){
+			String userId = controller.getMySession("userId") == null ? "" : controller.getMySession("userId").toString();
+			String userName = controller.getMySession("userName") == null ? "" : controller.getMySession("userName").toString();
+			Map<String,Object> mapLog = new HashMap<String,Object>();
+			mapLog.put("fromPlatform", "web");
+			mapLog.put("content", userId+"|"+userName+"|" + map.get("ID") + "|" +map.get("PLATE_NUM") +"|"+map.get("FORCE_IS") +"|"+map.get("FORCE_DATE") +"|"+map.get("BUS_IS") +"|"+map.get("BUS_DATE"));
+			mapLog.put("BIZ_NAME", "更新车辆保险");
+			dao.addLogFlow(mapLog);
+			controller.setAttr("msg","保存成功");
+			controller.setAttr("resFlag", "0");
+		}else{
+			controller.setAttr("msg","保存失败");
+			controller.setAttr("resFlag", "0");
+		};
+	}
+	
+	private void saveBreakRules(){
+		Map<String, Object> map = controller.getMyParamMap("obj");
+		String userId = controller.getMySession("userId") == null ? "" : controller.getMySession("userId").toString();
+		String userName = controller.getMySession("userName") == null ? "" : controller.getMySession("userName").toString();
+		map.put("PERSON_ID", userId);
+		map.put("PERSON_NAME", userName);
+		if("".equals(map.get("ID")) ? dao.saveBreakRules(map) : dao.updateBreakRules(map)){
+			controller.setAttr("map",map);
+			controller.setAttr("msg","保存成功");
+			controller.setAttr("resFlag", "0");
+		}else{
+			controller.setAttr("msg","保存失败");
+			controller.setAttr("resFlag", "1");
+		}
+	}
+	
+	private void breakrulesList(){
+		pn = Integer.parseInt(controller.getMyParam("pn").toString());
+		ps = Integer.parseInt(controller.getMyParam("ps").toString());
+		Object searchContent = controller.getMyParam("searchContent");
+		controller.setAttrs(dao.breakrulesList(pn, ps,searchContent));
+		controller.setAttr("resFlag", "0");
+	}
+	
+	private void initFinanceFlow(){
+		controller.setAttr("companyPayModeList",dao.initCompanyPayMode());
+		controller.setAttr("resFlag", "0");
+	}
+	
+	private void replaceCarInfo(){
+		Map<String, Object> map = controller.getMyParamMap("obj");
+		controller.setAttr("replaceCar",dao.replaceCar(map));
+		controller.setAttr("carTable",dao.carTable(map));
+		controller.setAttr("financeFlowList", dao.queryFinanceFlow(map.get("ID").toString()));
+		controller.setAttr("resFlag", "0");
+	}
+	
+	private void updateContractForBack(){
+		String id = controller.getMyParam("id").toString();
+		if(dao.updateContractForBack(id)){
+			controller.setAttr("msg","提交成功");
+			controller.setAttr("resFlag", "0");
+		}else{
+			controller.setAttr("msg","提交失败");
+			controller.setAttr("resFlag", "1");
+		}
+	}
+	
+	private void startReplaceCar(){
+		Map<String, Object> map = controller.getMyParamMap("obj");
+		String userId = controller.getMySession("userId") == null ? "" : controller.getMySession("userId").toString();
+		String userName = controller.getMySession("userName") == null ? "" : controller.getMySession("userName").toString();
+		map.put("PERSON_ID", userId);
+		map.put("PERSON_NAME", userName);
+		if(dao.checkReplaceCar(map) > 0){
+			controller.setAttr("msg","已发起过");
+			controller.setAttr("resFlag", "2");
+		}
+		else{
+			if(dao.startReplaceCar(map)){
+				if(dao.startReplaceCarCarTable(map)){
+					controller.setAttr("msg","启动成功");
+					controller.setAttr("resFlag", "0");
+				}else{
+					controller.setAttr("msg","启动成功");
+					controller.setAttr("resFlag", "0");
+				}
+			}else{
+				controller.setAttr("msg","启动失败");
+				controller.setAttr("resFlag", "1");
+			}
+		}
+	}
+	
+	private void replaceCarList(){
+		pn = Integer.parseInt(controller.getMyParam("pn").toString());
+		ps = Integer.parseInt(controller.getMyParam("ps").toString());
+		Object searchContent = controller.getMyParam("searchContent");
+		controller.setAttrs(dao.replaceList(pn, ps,searchContent));
+		controller.setAttr("resFlag", "0");
+	}
+	
+	private void saveReplaceOfRepair(){
+		Map<String, Object> replaceCar = controller.getMyParamMap("replaceCar");
+		Map<String, Object> carTable = controller.getMyParamMap("carTable");
+		if(dao.updateCarTable(carTable) > 0 && dao.updateCarTable(replaceCar) > 0 && dao.updateReplaceCarCarTable(replaceCar) > 0 && dao.updateReplaceCar(replaceCar)){
+			controller.setAttr("msg","保存成功");
+			controller.setAttr("resFlag", "0");
+		}else{
+			controller.setAttr("msg","保存失败");
+			controller.setAttr("resFlag", "1");
+		}
 	}
 }

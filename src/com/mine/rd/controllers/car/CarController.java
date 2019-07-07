@@ -30,6 +30,25 @@ public class CarController extends BaseController{
 	
 	/**
 	 * @author woody
+	 * @date 20190319
+	 * 方法：根据卡号查询车辆信息
+	 */
+	public void queryAndCarTablebyCardno(){
+		logger.info("根据卡号查询车辆信息");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("根据卡号查询车辆信息异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
 	 * @date 20190323
 	 * 方法：根据牌照号查询车辆信息
 	 */
@@ -503,6 +522,39 @@ public class CarController extends BaseController{
 		renderJsonForCors();
 	}
 	
+	public void contractForReplaceCarList(){
+		logger.info("合同列表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("合同列表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190323
+	 * 方法：未完成合同列表
+	 */
+	public void contractUnfinishList(){
+		logger.info("未完成合同列表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("未完成合同列表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
 	/**
 	 * @author woody
 	 * @date 20190323
@@ -617,6 +669,20 @@ public class CarController extends BaseController{
 		renderJsonForCors();
 	}
 	
+	public void saveReplaceCarManage(){
+		logger.info("更新替换车车管部门");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("更新替换车车管部门异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
 	/**
 	 * @author woody
 	 * @date 20190323
@@ -685,6 +751,476 @@ public class CarController extends BaseController{
 			service.doService();
 		} catch (Exception e) {
 			logger.error("保存车辆共享池异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190427
+	 * 方法：保存财务流水表
+	 */
+	public void saveFinanceFlow(){
+		logger.info("保存财务流水表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("保存财务流水表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190427
+	 * 方法：查询财务流水表
+	 */
+	public void queryFinanceFlowList(){
+		logger.info("查询财务流水表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("查询财务流水表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190427
+	 * 方法：删除财务流水表
+	 */
+	public void delFinanceFlow(){
+		logger.info("删除财务流水表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("删除财务流水表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190427
+	 * 方法：查询合同中车辆表
+	 */
+	public void queryCarTable(){
+		logger.info("查询合同中车辆表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("查询合同中车辆表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	public void queryCarTableBack(){
+		logger.info("查询合同中车辆表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("查询合同中车辆表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190427
+	 * 方法：保存合同中车辆表
+	 */
+	public void saveCarTable(){
+		logger.info("保存合同中车辆表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("保存合同中车辆表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	public void saveCarTableBack(){
+		logger.info("保存合同中车辆表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("保存合同中车辆表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190427
+	 * 方法：保存合同中车辆表
+	 */
+	public void saveCarTableOne(){
+		logger.info("保存合同中车辆表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("保存合同中车辆表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190427
+	 * 方法：保存合同中车辆表
+	 */
+	public void saveCarTableDeliver(){
+		logger.info("保存合同中车辆表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("保存合同中车辆表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190427
+	 * 方法：删除合同中车辆表
+	 */
+	public void delCarTable(){
+		logger.info("保存合同中车辆表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("删除合同中车辆表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190511
+	 * 方法：客户列表
+	 */
+	public void customerList(){
+		logger.info("客户列表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("客户列表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190511
+	 * 方法：停车场列表
+	 */
+	public void carparkList(){
+		logger.info("停车场列表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("停车场列表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190511
+	 * 方法：保存停车场
+	 */
+	public void savecarpark(){
+		logger.info("保存停车场");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("保存停车场异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190511
+	 * 方法：需要年检车辆列表
+	 */
+	public void carListForYearCheck(){
+		logger.info("需要年检车辆列表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("需要年检车辆列表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190511
+	 * 方法：更新车辆年检年份
+	 */
+	public void updateCarDriverYear(){
+		logger.info("需要年检车辆列表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("需要年检车辆列表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	/**
+	 * @author woody
+	 * @date 20190511
+	 * 方法：更新保险
+	 */
+	public void updateInsureance(){
+		logger.info("更新保险");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("更新保险异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	/**
+	 * @author woody
+	 * @date 20190511
+	 * 方法：车辆违章
+	 */
+	public void saveBreakRules(){
+		logger.info("保存车辆违章");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("保存车辆违章异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	/**
+	 * @author woody
+	 * @date 20190511
+	 * 方法：车辆违章列表
+	 */
+	public void breakrulesList(){
+		logger.info("保存车辆违章列表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("保存车辆违章列表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190323
+	 * 方法：初始化付款信息
+	 */
+	public void initFinanceFlow(){
+		logger.info("初始化付款信息");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("初始化付款信息异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	public void saveContractBack(){
+		logger.info("收车信息");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("收车信息异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	public void updateContractForBack(){
+		logger.info("更新合同状态");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("更新合同状态异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190519
+	 * 方法：启动替换车流程
+	 */
+	public void startReplaceCar(){
+		logger.info("启动替换车流程");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("启动替换车流程异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @date 20190519
+	 * 方法：替换车流程列表
+	 */
+	public void replaceCarList(){
+		logger.info("替换车流程列表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("替换车流程列表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	public void replaceCarInfo(){
+		logger.info("替换车信息");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("替换车信息异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	public void saveReplaceOfRepair(){
+		logger.info("保存替换车售后部分");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("保存替换车售后部分异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	public void queryCarTableReplace(){
+		logger.info("查询替换车具体列表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("查询替换车具体列表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	public void saveCarTableReplace(){
+		logger.info("更新替换车具体列表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("更新替换车具体列表异常===>" + e.getMessage());
 			this.setAttr("msg", "系统异常！");
 			this.setAttr("resFlag", "1");
 			e.printStackTrace();

@@ -20,6 +20,8 @@ import com.mine.pub.controller.BaseController;
 import com.mine.pub.kit.DateKit;
 import com.mine.pub.kit.Md5kit;
 import com.mine.pub.service.BaseService;
+import com.mine.pub.service.Service;
+import com.mine.rd.services.car.service.CarService;
 import com.mine.rd.services.demo.pojo.DemoDao;
 
 public class DemoService extends BaseService
@@ -35,23 +37,13 @@ public class DemoService extends BaseService
 	}
 	private void test()
 	{
-		if(controller.getMyParam("pwd") != null)
-		{
-			System.out.println("pwd 16========>>"+Md5kit.toMd5(controller.getMyParam("pwd").toString(),16));
-			System.out.println("pwd 32========>>"+Md5kit.toMd5(controller.getMyParam("pwd").toString(),32));
+		String p = controller.getPara("p") == null ? "" : controller.getPara("p").toString();
+		if(!"".equals(p)){
+			dao.savetest2(p);
 		}
-		
-		System.out.println("getParamMap===>>"+controller.getParamMap());
-		System.out.println("liner_name===========>>"+controller.getMyParam("liner_name"));
-//		System.out.println("map name===========>>"+getMyParamMap("visitors111").get("name"));
-//		System.out.println("list cardtype===========>>"+getMyParamList("visitors").get(0).get("card_type"));
-		System.out.println("你的业务");
-		System.out.println("获取主键====>>"+dao.getSeqId("os_user"));
-		System.out.println("获取系统时间====>>"+dao.getSysdate());
-		System.out.println("获取系统时间字符串====>>"+DateKit.getTimestamp(dao.getSysdate()));
-		//session 处理
-//		controller.setAppSession("1aaa", "2bbb");
-//		Db.update("insert into demo (name) values (?) " ,"aa");
+		List<Map<String,Object>> list = dao.testList();
+		controller.setAttr("list",list);
+		controller.setAttr("resFlag", "0");
 	}
 	private void saveUpdateFlow() throws Exception{
 		String tbId = controller.getPara("tbid").toString();
@@ -137,8 +129,16 @@ public class DemoService extends BaseService
 			n[0]++;
 		}
 	}
+	
+	private void carpark(){
+		String fieldId = controller.getPara("fieldId").toString();
+		List<Map<String,Object>> list = dao.carparkList(fieldId);
+		controller.setAttr("list",list);
+		controller.setAttr("resFlag", "0");
+	}
+	
 	@Override
-	public void doService(){
+	public void doService() throws Exception{
 		Db.tx(new IAtom() {
 	        @Override
 	        public boolean run() throws SQLException {
@@ -148,11 +148,19 @@ public class DemoService extends BaseService
 	        			System.out.println("LastMethodName====>>" + getLastMethodName());
 	        			controller.setAttr("", toJson());
 	        		}
-	            	if("uploadLocalTransferData".equals(getLastMethodName(7)))
+	            	else if("uploadLocalTransferData".equals(getLastMethodName(7)))
 	            	{
 	            		saveUpdateFlow();
 	            		upload();
 	            		controller.setAttr("res", "upload success");
+	            	}
+	            	else if("carpark".equals(getLastMethodName(7)))
+	            	{
+	            		carpark();
+	            	}
+	            	else if("test".equals(getLastMethodName(7)))
+	            	{
+	            		test();
 	            	}
 	            } catch (Exception e) {
 	                e.printStackTrace();
