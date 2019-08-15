@@ -370,12 +370,68 @@ public class CarController extends BaseController{
 		renderJsonForCors();
 	}
 	
+	public void saveRepairPay(){
+		logger.info("保存维修记录");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("保存维修记录异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	public void saveRepairFlow(){
+		logger.info("保存维修记录");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("保存维修记录异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	public void queryRepairFlow(){
+		logger.info("保存维修记录");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("保存维修记录异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
 	/**
 	 * @author woody
 	 * @date 20190323
 	 * 方法：查询维修列表
 	 */
 	public void repairList(){
+		logger.info("查询维修列表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("查询维修列表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	public void repairFlowList(){
 		logger.info("查询维修列表");
 		Service service = new CarService(this);
 		try {
@@ -1227,4 +1283,33 @@ public class CarController extends BaseController{
 		}
 		renderJsonForCors();
 	}
+	
+	public void createWord(){
+		logger.info("生成合同");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("生成合同异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	public void bangCar(){
+		logger.info("车辆绑卡");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("车辆绑卡异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
 }

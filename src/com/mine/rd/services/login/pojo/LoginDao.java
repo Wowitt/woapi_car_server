@@ -84,4 +84,22 @@ public class LoginDao extends BaseDao {
 		return map;
 	}
 	
+	public Map<String, Object> loginForAPP(String tel){
+		String sql = "select * from APP_USER where status != '2' and tel = ? ";
+		Record record = Db.findFirst(sql, tel);
+		return record != null ? record.getColumns() : null;
+	}
+	
+	public Map<String, Object> registerForAPP(String tel,String pwd){
+		Record record = new Record();
+		record.set("ID", getSeqId("APP_USER"));
+		record.set("TEL", tel);
+		record.set("NAME", tel);
+		record.set("PWD", pwd);
+		record.set("STATUS", "0");
+		record.set("sysdate", getSysdate());
+		boolean flag = Db.save("APP_USER", record);
+		return flag ? record.getColumns() : null;
+	}
+	
 }

@@ -119,9 +119,9 @@ public class LoginController extends BaseController {
 	}
 	
 	/**
-	 * @author ouyangxu
+	 * @author woody
 	 * @throws Exception 
-	 * @date 20170510
+	 * @date 20190708
 	 * 方法：APP账号登录
 	 */
 	public void loginForAPP(){
@@ -135,9 +135,6 @@ public class LoginController extends BaseController {
 			this.setAttr("resFlag", "1");
 			e.printStackTrace();
 		}
-//		if(!"0".equals(this.getAttr("resFlag"))){
-//			this.setAttr("IWBSESSION", "");
-//		}
 		renderJsonForCorsLoginRegister();
 	}
 	
@@ -188,5 +185,25 @@ public class LoginController extends BaseController {
 			e.printStackTrace();
 		}
 		renderJsonForCors();
+	}
+	
+	/**
+	 * @author woody
+	 * @throws Exception 
+	 * @date 20190708
+	 * 方法：APP账号注册
+	 */
+	public void registerForAPP(){
+		logger.info("APP账号注册");
+		Service service = new LoginService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("APP账号注册异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCorsLoginRegister();
 	}
 }

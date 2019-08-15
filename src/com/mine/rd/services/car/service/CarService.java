@@ -1,10 +1,28 @@
 package com.mine.rd.services.car.service;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+
+import com.jfinal.kit.PathKit;
+import com.jfinal.kit.PropKit;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.IAtom;
 import com.mine.pub.controller.BaseController;
@@ -183,6 +201,24 @@ public class CarService extends BaseService{
 		            else if("saveReplaceCarManage".equals(getLastMethodName(7))){
 		            	saveReplaceCarManage();
 		            }
+		            else if("createWord".equals(getLastMethodName(7))){
+		            	createWord();
+		            }
+		            else if("repairFlowList".equals(getLastMethodName(7))){
+		            	repairFlowList();
+		            }
+		            else if("saveRepairFlow".equals(getLastMethodName(7))){
+		            	saveRepairFlow();
+		            }
+		            else if("queryRepairFlow".equals(getLastMethodName(7))){
+		            	queryRepairFlow();
+		            }
+		            else if("bangCar".equals(getLastMethodName(7))){
+		            	bangCar();
+		            }
+		            else if("saveRepairPay".equals(getLastMethodName(7))){
+		            	saveRepairPay();
+		            }
 	            } catch (Exception e) {
 	                e.printStackTrace();
 	                controller.setAttr("msg", "系统异常，请重新登录！");
@@ -205,7 +241,9 @@ public class CarService extends BaseService{
 	
 	private void getStatistics(){
 		long carCount = dao.getCarCount();
+		long componentCount = dao.getComponentCount();
 		controller.setAttr("carCount",carCount);
+		controller.setAttr("componentCount",componentCount);
 		controller.setAttr("resFlag", "0");
 	}
 	
@@ -435,9 +473,58 @@ public class CarService extends BaseService{
 	private void saveRepair(){
 		List<Map<String, Object>> components = controller.getMyParamList("components");
 		Map<String, Object> repairData = controller.getMyParamMap("repairData");
+//		Map<String, Object> financeFlow = controller.getMyParamMap("financeFlow");
+		String userId = controller.getMySession("userId") == null ? "" : controller.getMySession("userId").toString();
+		String userName = controller.getMySession("userName") == null ? "" : controller.getMySession("userName").toString();
+		repairData.put("USER_ID",userId);
+		repairData.put("USER_NAME",userName);
+//		if("".equals(repairData.get("CU_NAME"))){
+//			Map<String, Object> c = new HashMap<String, Object>();
+//			c.put("NAME", financeFlow.get("PAYER_NAME"));
+//			c.put("PHONE", repairData.get("CU_PHONE"));
+//			c.put("TYPE", "0");
+//			c.put("SOURCE", "维修手动添加");
+//			dao.addCustomerFromRepair(c);
+//			repairData.put("CU_NAME", c.get("NAME"));
+//			repairData.put("CU_PHONE", c.get("PHONE"));
+//			financeFlow.put("PAYER_ID", c.get("ID"));
+//		}
+		String repairId = dao.saveRepair(repairData);	
+//		financeFlow.put("PERSON_ID", userId);
+//		financeFlow.put("PERSON_NAME", userName);
+//		financeFlow.put("BIZ_ID", repairId);
+//		if(!"".equals(financeFlow.get("ID"))){
+//			 dao.delFinanceFlow(financeFlow.get("ID").toString());
+//		}
+//		boolean saveFinanceFlag = dao.saveFinanceFlow(financeFlow);
+		if(!"".equals(repairId)){
+			dao.updateStore(components, repairId);
+			components = dao.saveRepairList(components, repairId);
+			dao.saveRepairFlow(components,repairId);
+		}
+		if(!"".equals(repairId) && components !=null){
+			controller.setAttr("repairId", repairId);
+			String pat1 = "yyyy-MM-dd HH:mm:ss.SSS";
+			SimpleDateFormat sdf = new SimpleDateFormat(pat1);
+			controller.setAttr("begindate",sdf.format(dao.getSysdate()) );
+			controller.setAttr("componentList", components);
+//			controller.setAttr("financeFlow", financeFlow);
+			controller.setAttr("resFlag", "0");
+			controller.setAttr("msg", "保存成功");
+		}else{
+			controller.setAttr("resFlag", "1");
+			controller.setAttr("msg", "保存失败");
+		}
+	}
+	
+	private void saveRepairPay(){
+		List<Map<String, Object>> components = controller.getMyParamList("components");
+		Map<String, Object> repairData = controller.getMyParamMap("repairData");
 		Map<String, Object> financeFlow = controller.getMyParamMap("financeFlow");
 		String userId = controller.getMySession("userId") == null ? "" : controller.getMySession("userId").toString();
 		String userName = controller.getMySession("userName") == null ? "" : controller.getMySession("userName").toString();
+		repairData.put("USER_ID",userId);
+		repairData.put("USER_NAME",userName);
 		if(!"".equals(financeFlow.get("PAYER_NAME")) && "".equals(repairData.get("CU_NAME"))){
 			Map<String, Object> c = new HashMap<String, Object>();
 			c.put("NAME", financeFlow.get("PAYER_NAME"));
@@ -454,15 +541,46 @@ public class CarService extends BaseService{
 		financeFlow.put("PERSON_NAME", userName);
 		financeFlow.put("BIZ_ID", repairId);
 		if(!"".equals(financeFlow.get("ID"))){
-			 dao.delFinanceFlow(financeFlow.get("ID").toString());
+			dao.delFinanceFlow(financeFlow.get("ID").toString());
 		}
 		boolean saveFinanceFlag = dao.saveFinanceFlow(financeFlow);
 		if(!"".equals(repairId)){
+			dao.updateStore(components, repairId);
 			components = dao.saveRepairList(components, repairId);
+			dao.saveRepairFlow(components,repairId);
 		}
 		if(!"".equals(repairId) && components !=null && saveFinanceFlag){
 			controller.setAttr("repairId", repairId);
+			String pat1 = "yyyy-MM-dd HH:mm:ss.SSS";
+			SimpleDateFormat sdf = new SimpleDateFormat(pat1);
+			controller.setAttr("begindate",sdf.format(dao.getSysdate()) );
 			controller.setAttr("componentList", components);
+			controller.setAttr("financeFlow", financeFlow);
+			controller.setAttr("resFlag", "0");
+			controller.setAttr("msg", "保存成功");
+		}else{
+			controller.setAttr("resFlag", "1");
+			controller.setAttr("msg", "保存失败");
+		}
+	}
+	
+	private void saveRepairFlow(){
+		Map<String, Object> dataFlow = controller.getMyParamMap("dataFlow");
+		Map<String, Object> financeFlow = controller.getMyParamMap("financeFlow");
+		String userId = controller.getMySession("userId") == null ? "" : controller.getMySession("userId").toString();
+		String userName = controller.getMySession("userName") == null ? "" : controller.getMySession("userName").toString();
+		dao.updateComponent(dataFlow);
+		dataFlow.put("direction", "入");
+		String dataFlowId = dao.saveRepairFlow(dataFlow);	
+		financeFlow.put("PERSON_ID", userId);
+		financeFlow.put("PERSON_NAME", userName);
+		financeFlow.put("BIZ_ID", dataFlowId);
+		if(!"".equals(financeFlow.get("ID"))){
+			dao.delFinanceFlow(financeFlow.get("ID").toString());
+		}
+		boolean saveFinanceFlag = dao.saveFinanceFlow(financeFlow);
+		if(!"".equals(dataFlowId) && saveFinanceFlag){
+			controller.setAttr("dataFlowId", dataFlowId);
 			controller.setAttr("financeFlow", financeFlow);
 			controller.setAttr("resFlag", "0");
 			controller.setAttr("msg", "保存成功");
@@ -480,11 +598,27 @@ public class CarService extends BaseService{
 		controller.setAttr("resFlag", "0");
 	}
 	
+	private void repairFlowList(){
+		pn = Integer.parseInt(controller.getMyParam("pn").toString());
+		ps = Integer.parseInt(controller.getMyParam("ps").toString());
+		Object searchContent = controller.getMyParam("searchContent");
+		controller.setAttrs(dao.repairFlowList(pn, ps,searchContent));
+		controller.setAttr("resFlag", "0");
+	}
+	
 	private void queryRepair(){
 		String repairId = controller.getMyParam("repairId").toString();
 		controller.setAttr("repairData", dao.queryRepair(repairId));
-		controller.setAttr("financeFlow", dao.queryFinanceFlow(repairId).get(0));
+		controller.setAttr("financeFlow", dao.queryFinanceFlow(repairId).isEmpty()  ? "" : dao.queryFinanceFlow(repairId).get(0));
 		controller.setAttr("detailListData", dao.queryRepairList(repairId));
+		controller.setAttr("companyPayModeList",dao.initCompanyPayMode());
+		controller.setAttr("resFlag", "0");
+	}
+	
+	private void queryRepairFlow(){
+		String flowId = controller.getMyParam("flowId").toString();
+		controller.setAttr("dataFlow", dao.queryRepairFlow(flowId));
+		controller.setAttr("financeFlow", dao.queryFinanceFlow(flowId).get(0));
 		controller.setAttr("companyPayModeList",dao.initCompanyPayMode());
 		controller.setAttr("resFlag", "0");
 		controller.setAttr("msg", "保存成功");
@@ -493,6 +627,7 @@ public class CarService extends BaseService{
 	private void delComponentItem(){
 		String repairId = controller.getMyParam("repairId").toString();
 		String sonId = controller.getMyParam("id").toString();
+		dao.updateStoreForDel(repairId, sonId);
 		if(dao.delComponentItem(repairId, sonId) > 0){
 			controller.setAttr("resFlag", "0");
 			controller.setAttr("msg", "删除成功");
@@ -1174,6 +1309,127 @@ public class CarService extends BaseService{
 			controller.setAttr("resFlag", "0");
 		}else{
 			controller.setAttr("msg","保存失败");
+			controller.setAttr("resFlag", "1");
+		}
+	}
+	
+	private void createWord() throws Exception{
+		Map<String, Object> map=new HashMap<String, Object>();
+        String datetime = DateKit.toStr(new Date(),"yyyyMMddHHmmssSSS");
+        String BIZ_ID = controller.getMyParam("BIZ_ID").toString();
+        dao.createWordMap(map,BIZ_ID);
+        String sourcePath = PathKit.getWebRootPath() + PropKit.get("word_template") + controller.getMyParam("templateName");
+        String downloadPath = "/upload/words/" + BIZ_ID + "_" + datetime + controller.getMyParam("templateName");
+        String targetPath = PathKit.getWebRootPath() + downloadPath;
+        replaceAndSaveDoc(sourcePath, map , targetPath);
+        if(dao.updateContractForFile(controller.getMyParam("id").toString(),downloadPath)){
+        	controller.setAttr("downloadPath",downloadPath);
+        	controller.setAttr("msg","生成成功");
+			controller.setAttr("resFlag", "0");
+        }else{
+        	controller.setAttr("msg","生成失败");
+			controller.setAttr("resFlag", "1");
+        }
+	}
+	
+	private void replaceAndSaveDoc(String sourcePath, Map<String, Object> param , String targetPath) throws Exception{
+        // 读取word模板
+        File f = new File(sourcePath);
+        if(!f.exists()){
+            throw new RuntimeException("未读取到源文件");
+        }
+        InputStream fis = new FileInputStream(f);
+        XWPFDocument doc = replaceDoc(fis, param);
+        outPutWord(doc , targetPath);
+    }
+	
+	/**
+     * 读取word模板并替换变量
+     * @param fis   模版文件流
+     * @param param 要替换的键值对
+     * @return
+     */
+    private XWPFDocument replaceDoc(InputStream fis, Map<String, Object> param) throws Exception{
+        XWPFDocument doc = new XWPFDocument(fis);
+        //处理段落
+        List<XWPFParagraph> paragraphList = doc.getParagraphs();
+        processParagraph(paragraphList,doc,param);
+        //处理表格
+        Iterator<XWPFTable> it = doc.getTablesIterator();
+        while (it.hasNext()) {
+            XWPFTable table = it.next();
+            List<XWPFTableRow> rows = table.getRows();
+            for (XWPFTableRow row : rows) {
+                List<XWPFTableCell> cells = row.getTableCells();
+                for (XWPFTableCell cell : cells) {
+                    List<XWPFParagraph> paragraphListTable =  cell.getParagraphs();
+                    processParagraph(paragraphListTable, doc, param);
+                }
+            }
+        }
+        return doc;
+    }
+    
+    /**
+     * 替换文字
+     * @param paragraphList
+     * @param doc
+     * @param param
+     */
+    private void processParagraph(List<XWPFParagraph> paragraphList, XWPFDocument doc,Map<String, Object> param){
+        if(paragraphList != null && paragraphList.size() > 0){
+            for(XWPFParagraph paragraph:paragraphList){
+                List<XWPFRun> runs = paragraph.getRuns();
+                for (XWPFRun run : runs) {
+                    String text = run.getText(0);
+                    if(text != null){
+                        boolean isSetText = false;
+                        for (Map.Entry<String, Object> entry : param.entrySet()) {
+                            String key = entry.getKey();
+                            if(text.indexOf(key) != -1){
+                                isSetText = true;
+                                Object value = entry.getValue();
+                                if (value instanceof String) {//文本替换
+                                    text = text.replace(key, value.toString());
+                                    //System.out.println(text);//放开注释可打印读取到的word内容
+                                }
+                                else{
+                                    text = text.replace(key, "");
+                                }
+                            }
+                        }
+                        if(isSetText){
+                            run.setText(text,0);
+                        }
+                    }
+                }
+            }
+        }
+    }
+	
+	/**
+     * 输出word到目标路径
+     * @param doc 文档对象
+     * @param targetPath 目标路径
+     * @throws FileNotFoundException
+     */
+    private void outPutWord(XWPFDocument doc , String targetPath) throws Exception{
+    	if (doc != null) {
+            OutputStream os = new FileOutputStream(targetPath);
+            doc.write(os);
+            os.close();
+            System.out.println("已替换word文件，文件地址：" + targetPath);
+        }
+    }
+    
+    private void bangCar(){
+		String cardno = controller.getMyParam("cardno") == null ? "" : controller.getMyParam("cardno").toString();
+		String plateNum = controller.getMyParam("plateNum") == null ? "" : controller.getMyParam("plateNum").toString();
+		if(dao.bangCar(plateNum,cardno)){
+			controller.setAttr("msg","绑定成功");
+			controller.setAttr("resFlag", "0");
+		}else{
+			controller.setAttr("msg","绑定失败");
 			controller.setAttr("resFlag", "1");
 		}
 	}

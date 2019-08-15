@@ -13,10 +13,12 @@ import com.jfinal.plugin.activerecord.IAtom;
 import com.mine.pub.controller.BaseController;
 import com.mine.pub.service.BaseService;
 import com.mine.rd.services.admin.pojo.AdminDao;
+import com.mine.rd.services.car.pojo.CarDao;
 import com.sun.mail.smtp.SMTPAddressFailedException;
 
 public class AdminService extends BaseService{
 	private AdminDao dao = new AdminDao();
+	private CarDao carDao = new CarDao();
 	
 	private int pn = 0;
 	private int ps = 0;
@@ -133,21 +135,25 @@ public class AdminService extends BaseService{
 			if("SJSPROLE".equals(ROLEID)){
 				controller.setAttr("forgetPwdNum", dao.forgetPwdNum());
 			}
-		}else if("epAdminCs".equals(userType)){		//epAdminCs-医疗单位管理员
-			String epId = controller.getMyParam("epId").toString();
-			String action = controller.getMyParam("action").toString();
-			num = Integer.parseInt(dao.epAdminTask(epId, action, 1, 10, "").get("totalRow").toString());
-			controller.setAttr("unSubmitPlanNum", dao.queryUnsubmitPlanNum(epId));
-		}else if("epAdminCz".equals(userType)){		//epAdminCz-医疗处置单位管理员
-			String epId = controller.getMyParam("epId").toString();
-			controller.setAttr("agreementNum", dao.queryAgreementNum(epId));
 		}
-		else if("CSEP".equals(userType)){		
-			String epId = controller.getMyParam("epId").toString();
-			String action = controller.getMyParam("action").toString();
-			num = Integer.parseInt(dao.epAdminTask(epId, action, 1, 10, "").get("totalRow").toString());
-		}
-		controller.setAttr("taskNum", num);
+//		else if("epAdminCs".equals(userType)){		//epAdminCs-医疗单位管理员
+//			String epId = controller.getMyParam("epId").toString();
+//			String action = controller.getMyParam("action").toString();
+//			num = Integer.parseInt(dao.epAdminTask(epId, action, 1, 10, "").get("totalRow").toString());
+//			controller.setAttr("unSubmitPlanNum", dao.queryUnsubmitPlanNum(epId));
+//		}else if("epAdminCz".equals(userType)){		//epAdminCz-医疗处置单位管理员
+//			String epId = controller.getMyParam("epId").toString();
+//			controller.setAttr("agreementNum", dao.queryAgreementNum(epId));
+//		}
+//		else if("CSEP".equals(userType)){		
+//			String epId = controller.getMyParam("epId").toString();
+//			String action = controller.getMyParam("action").toString();
+//			num = Integer.parseInt(dao.epAdminTask(epId, action, 1, 10, "").get("totalRow").toString());
+//		}
+		controller.setAttr("contractNum", carDao.contractList(1, 10, "").get("totalRow").toString());
+		controller.setAttr("repairNum", carDao.repairList(1, 10, "").get("totalRow").toString());
+		controller.setAttr("breakrulesNum", carDao.breakrulesList(1, 10, "").get("totalRow").toString());
+		controller.setAttr("taskNum", "0");
 		controller.setAttr("resFlag", "0");
 	}
 	

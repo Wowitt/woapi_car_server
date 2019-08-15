@@ -88,6 +88,61 @@ public class LoginService extends BaseService {
 		}
 	}
 	
+	private void loginForAPP() throws Exception{
+		controller.doIWBSESSION();
+		String tel = controller.getMyParam("tel").toString();
+		String pwd = controller.getMyParam("pwd").toString();
+		Map<String , Object> user = dao.loginForAPP(tel);
+		if(user != null && user.get("ID") != null && !"".equals(user.get("ID"))){
+			if(pwd.equals(user.get("PWD"))){
+				controller.setMySession("userId",user.get("ID"));
+				controller.setMySession("tel",tel);
+				controller.setMySession("userName",user.get("NAME") == null ? "" : user.get("NAME"));
+				controller.setMySession("status",user.get("STATUS"));
+				controller.setMySession("ifLogin","0");
+				controller.setMySession("userPortrait",user.get("IMGPATH")== null ? "" : user.get("IMGPATH"));
+				//token值
+				controller.setMySession("WJWT", dao.getToken());
+				controller.setAttr("resFlag", "0");
+				controller.setAttr("msg", "登录成功！");
+			}else{
+				controller.setAttr("resFlag", "1");
+				controller.setMySession("ifLogin","");
+				controller.setAttr("msg", "密码错误！");
+			}
+		}else{   // 查询不到用户信息
+			controller.setAttr("resFlag", "1");
+			controller.setMySession("ifLogin","");
+			controller.setAttr("msg", "用户不存在！");
+		}
+	}
+	
+	private void registerForAPP() throws Exception{
+		String tel = controller.getMyParam("tel").toString();
+		String pwd = controller.getMyParam("pwd").toString();
+		Map<String , Object> user = dao.loginForAPP(tel);
+		if(user != null && user.get("ID") != null && !"".equals(user.get("ID"))){
+			controller.setAttr("resFlag", "1");
+			controller.setMySession("ifLogin","");
+			controller.setAttr("msg", "用户已存在！");
+		}else{   // 查询不到用户信息
+			Map<String , Object> registerUser = dao.registerForAPP(tel,pwd);
+			if(registerUser != null){
+				controller.doIWBSESSION();
+				controller.setMySession("tel",tel);
+				controller.setMySession("userId",registerUser.get("ID"));
+				controller.setMySession("userName",registerUser.get("NAME"));
+				controller.setMySession("status",registerUser.get("STATUS"));
+				controller.setMySession("ifLogin","0");
+				controller.setMySession("userPortrait","");
+				//token值
+				controller.setMySession("WJWT", dao.getToken());
+				controller.setAttr("resFlag", "0");
+				controller.setAttr("msg", "登录成功！");
+			}
+		}
+	}
+	
 	@Override
 	public void doService() throws Exception {
 		Db.tx(new IAtom() {
@@ -98,8 +153,15 @@ public class LoginService extends BaseService {
 	        			adminLogin();
 	        		}else if("login".equals(getLastMethodName(7))){
 	        			login();
-	        		}else if("loginForPDA".equals(getLastMethodName(7))){
+	        		}
+	        		else if("loginForPDA".equals(getLastMethodName(7))){
 	        			login();
+	        		}
+	        		else if("loginForAPP".equals(getLastMethodName(7))){
+	        			loginForAPP();
+	        		}
+	        		else if("registerForAPP".equals(getLastMethodName(7))){
+	        			registerForAPP();
 	        		}
 	            } catch (Exception e) {
 	                e.printStackTrace();
