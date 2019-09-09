@@ -358,6 +358,36 @@ public class CarDao extends BaseDao {
 		return resMap;
 	}
 	
+	public Map<String, Object> appOrderList(int pn, int ps, Object searchContent){
+		String sql = "from APP_ORDER A where A.status != '2'  ";
+		if(searchContent != null && !"".equals(searchContent)){
+			sql = sql + " and (DATE_FORMAT(A.orderdate,\"%Y-%m-%d \") like '%"+searchContent+"%' or A.ID like '%"+searchContent+"%' or A.USER_NAME like '%"+searchContent+"%'  or A.USER_TEL like '%"+searchContent+"%' or A.CAR_manufacturers like '%"+searchContent+"%' or A.CAR_BRAND like '%"+searchContent+"%' or A.CAR_BRANDDESC like '%"+searchContent+"%'  ) ";
+		}
+		sql = sql + " order by a.sysdate desc ";
+		Page<Record> page = Db.paginate(pn, ps, "select A.*,DATE_FORMAT(A.orderdate,\"%Y-%m-%d \") orderdatestr  ", sql );
+		List<Record> eps = page.getList();
+		List<Map<String, Object>> epList = new ArrayList<>();
+		Map<String, Object> resMap = new HashMap<>();
+		if(eps != null){
+			for(Record record : eps){
+				Map<String, Object> map = new HashMap<>();
+				map.put("ID", record.get("ID"));
+				map.put("STATUS", record.get("STATUS"));
+				map.put("USER_NAME", record.get("USER_NAME"));
+				map.put("USER_TEL", record.get("USER_TEL"));
+				map.put("CAR_manufacturers", record.get("CAR_manufacturers"));
+				map.put("CAR_BRAND", record.get("CAR_BRAND"));
+				map.put("CAR_BRANDDESC", record.get("CAR_BRANDDESC"));
+				map.put("orderdate", record.get("orderdatestr"));
+				epList.add(map);
+			}
+		}
+		resMap.put("dataList", epList);
+		resMap.put("totalPage", page.getTotalPage());
+		resMap.put("totalRow", page.getTotalRow());
+		return resMap;
+	}
+	
 	public Map<String, Object> contractForReplaceCarList(int pn, int ps, Object searchContent){
 		String sql = "from C_WOBO_CONTRACT A, C_WOBO_CONTRACT_CARTABLE B where a.id = b.id and  A.status != '2'  ";
 		if(searchContent != null && !"".equals(searchContent)){
@@ -1123,6 +1153,11 @@ public class CarDao extends BaseDao {
 		return record != null ? record.getColumns() : null;
 	}
 	
+	public Map<String,Object> getOrder(String id){
+		Record record = Db.findFirst("select a.*,DATE_FORMAT(a.orderdate,\"%Y-%m-%d\") orderdatestr,DATE_FORMAT(a.begindate,\"%Y-%m-%d\") begindatestr,DATE_FORMAT(a.enddate,\"%Y-%m-%d\") enddatestr from APP_ORDER a where id = ? ",id);
+		return record != null ? record.getColumns() : null;
+	}
+	
 	public Map<String,Object> getContractFinance(String id){
 		Record record = Db.findFirst("select * from C_WOBO_CONTRACT_FINANCE where id = ? ",id);
 		return record != null ? record.getColumns() : null;
@@ -1130,6 +1165,11 @@ public class CarDao extends BaseDao {
 	
 	public Map<String,Object> getContractBack(String id){
 		Record record = Db.findFirst("select a.*,DATE_FORMAT(a.sysdate,\"%Y-%m-%d\") backdate from C_WOBO_CONTRACT_BACK a where id = ? ",id);
+		return record != null ? record.getColumns() : null;
+	}
+	
+	public Map<String,Object> getReplaceBack(String id){
+		Record record = Db.findFirst("select a.*,DATE_FORMAT(a.sysdate,\"%Y-%m-%d\") backdate from C_WOBO_REPLACECAR a where id = ? ",id);
 		return record != null ? record.getColumns() : null;
 	}
 	
@@ -1186,9 +1226,9 @@ public class CarDao extends BaseDao {
 	public boolean updateContractForBack(String id){
 		Record record = new Record();
 		record.set("ID", id);
-		record.set("STATUS","5");
-		record.set("STATUSNAME","合同结束");
-		return Db.update("C_WOBO_CONTRACT", "ID",record);
+		record.set("BACK_STATUS","3");
+		record.set("BACK_STATUSNAME","还车结束");
+		return Db.update("C_WOBO_REPLACECAR", "ID",record);
 	}
 	
 	public int updateCarDriverNum(String id,String driver_num){
@@ -1255,6 +1295,29 @@ public class CarDao extends BaseDao {
 		}
 	}
 	
+	public boolean updateReplaceBack(Map<String,Object> map){
+		Record record = new Record();
+		record.set("ID", map.get("ID"));
+		record.set("BREAKRULES_NUM", map.get("BREAKRULES_NUM"));
+		record.set("BREAKRULES_SCORE", map.get("BREAKRULES_SCORE"));
+		record.set("BREAKRULES_MONEY", map.get("BREAKRULES_MONEY"));
+		record.set("DAMAGE_MONEY", map.get("DAMAGE_MONEY"));
+		record.set("DAMAGE", map.get("DAMAGE"));
+		if(map.get("type").equals(1)){
+			record.set("CARMANAGE_BACK_USER_ID", map.get("USER_ID"));
+			record.set("CARMANAGE_BACK_USER_NAME", map.get("USER_NAME"));
+			record.set("CARMANAGE_BACK_STATUS", "0");
+		}else{
+			record.set("REPAIR_BACK_USER_ID", map.get("USER_ID"));
+			record.set("REPAIR_BACK_USER_NAME", map.get("USER_NAME"));
+			record.set("REPAIR_BACK_STATUS", "0");
+		}
+		record.set("sysdate", getSysdate());
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		map.put("backdate",sdf.format(getSysdate()));
+		return Db.update("C_WOBO_REPLACECAR","ID",record);
+	}
+	
 	public boolean saveContractCarManage(Map<String,Object> map){
 		Record record = new Record();
 		record.set("ID", map.get("ID"));
@@ -1309,6 +1372,15 @@ public class CarDao extends BaseDao {
 	
 	public List<Map<String,Object>> queryFinanceFlow(String id){
 		List<Record> list = Db.find("select * from C_WOBO_FINANCE_FLOW where biz_id = ? and status = '1'",id);
+		List<Map<String, Object>> resList = new ArrayList<>();
+		for(Record record : list){
+			resList.add(record.getColumns());
+		}
+		return resList;
+	}
+	
+	public List<Map<String,Object>> queryFinanceFlowByUserId(String id){
+		List<Record> list = Db.find("select * from C_WOBO_FINANCE_FLOW where payer_id = ? and status = '1'",id);
 		List<Map<String, Object>> resList = new ArrayList<>();
 		for(Record record : list){
 			resList.add(record.getColumns());
@@ -1391,6 +1463,21 @@ public class CarDao extends BaseDao {
 		sb.append(",a.CHARGE_GUN,a.TOOL_KIT,a.TRIPOD ,a.FIRE_EXTINGUISHER,a.MAINTENANCE,a.AD ");
 		sb.append("from c_wobo_car a,C_WOBO_CONTRACT_BACK_CARTABLE b  ");
 		sb.append("where a.PLATE_NUM = b.PLATE_NUM and b.status='1' and  b.id = ? order by a.gear");
+		List<Record> list = Db.find(sb.toString(),id);
+		List<Map<String, Object>> resList = new ArrayList<>();
+		for(Record record : list){
+			resList.add(record.getColumns());
+		}
+		return resList;
+	}
+	
+	public List<Map<String,Object>> queryCarTableBackBack(String id){
+		StringBuffer sb = new StringBuffer();
+		sb.append("select ");
+		sb.append("b.ID,a.PLATE_NUM,a.DRIVER_NUM,a.gear,a.DRIVING_LICENSE ,a.MAINTENANCE_SIGN,a.CAR_KEY,a.CAR_KEY_NUM,a.INSURANCE,a.YEAR_CHECK_FLAG ");
+		sb.append(",a.CHARGE_GUN,a.TOOL_KIT,a.TRIPOD ,a.FIRE_EXTINGUISHER,a.MAINTENANCE,a.AD ");
+		sb.append("from c_wobo_car a,C_WOBO_REPLACECAR_CARTABLE b  ");
+		sb.append("where a.PLATE_NUM = b.PLATE_NUM_ORI and b.status='1' and  b.co_id = ? order by a.gear");
 		List<Record> list = Db.find(sb.toString(),id);
 		List<Map<String, Object>> resList = new ArrayList<>();
 		for(Record record : list){
@@ -1791,5 +1878,45 @@ public class CarDao extends BaseDao {
 	
 	public boolean bangCar(String plateNum,String cardno){
 		return Db.update("update C_WOBO_CAR set cardno = ? where plate_num = ? ", cardno,plateNum) > 0;
+	}
+	
+	public boolean updateContractCartableForReplace(Map<String,Object> map){
+		Record record = Db.findFirst("select * from C_WOBO_REPLACECAR_CARTABLE a where id = ? and CO_ID = ? ",map.get("ID"),map.get("CO_ID"));
+		Record newRecord = new Record();
+		newRecord.set("ID", record.get("CO_ID"));
+		newRecord.set("PLATE_NUM", record.get("PLATE_NUM"));
+		newRecord.set("STATUS", "1");
+		newRecord.set("sysdate", getSysdate());
+		return Db.save("C_WOBO_CONTRACT_CARTABLE", newRecord) && Db.save("C_WOBO_CONTRACT_BACK_CARTABLE", newRecord);
+	}
+	
+	public void delContractCarTable(String replaceId){
+		Record record = Db.findFirst("select * from C_WOBO_REPLACECAR_CARTABLE where id = ? ",replaceId);
+		Db.update("delete from C_WOBO_CONTRACT_CARTABLE where id = ? and plate_num = ? ",record.get("CO_ID"),record.get("PLATE_NUM_ORI"));
+		Db.update("delete from C_WOBO_CONTRACT_BACK_CARTABLE where id = ? and plate_num = ? ",record.get("CO_ID"),record.get("PLATE_NUM_ORI"));
+	}
+	
+	public boolean updateAppOrder(Map<String,Object> map){
+		Record newRecord = new Record();
+		newRecord.set("ID", map.get("ID"));
+		newRecord.set("TOTAL_MONEY", map.get("TOTAL_MONEY"));
+		newRecord.set("STATUS", "1");
+		newRecord.set("begindate",map.get("begindate"));
+		newRecord.set("enddate", map.get("enddate"));
+		newRecord.set("CAR_FRAME_NUMBER", map.get("CAR_FRAME_NUMBER"));
+		newRecord.set("CAR_PLATE_NUM", map.get("CAR_PLATE_NUM"));
+		newRecord.set("ORDER_USER_ID", map.get("ORDER_USER_ID"));
+		newRecord.set("ORDER_USER_NAME", map.get("ORDER_USER_NAME"));
+		return Db.update("APP_ORDER","ID",newRecord);
+	}
+	
+	public int updateOfferCode(String code){
+		return Db.update("update APP_OFFER_CODE set status = '1' where code = ? ",code);
+	}
+	
+	public Map<String,Object> checkOfferCode(String code){
+		Record record = Db.findFirst("select * from APP_OFFER_CODE where status = '0' and code = ? ",code);
+		return record != null ? record.getColumns() : null;
+		
 	}
 }

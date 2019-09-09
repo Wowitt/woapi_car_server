@@ -833,6 +833,20 @@ public class CarController extends BaseController{
 		renderJsonForCors();
 	}
 	
+	public void saveFinanceFlowForReplace(){
+		logger.info("保存财务流水表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("保存财务流水表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
 	/**
 	 * @author woody
 	 * @date 20190427
@@ -891,6 +905,20 @@ public class CarController extends BaseController{
 	}
 	
 	public void queryCarTableBack(){
+		logger.info("查询合同中车辆表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("查询合同中车辆表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	public void queryCarTableBackBack(){
 		logger.info("查询合同中车辆表");
 		Service service = new CarService(this);
 		try {
@@ -1176,6 +1204,20 @@ public class CarController extends BaseController{
 		renderJsonForCors();
 	}
 	
+	public void updateReplaceBack(){
+		logger.info("收车信息");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("收车信息异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
 	public void updateContractForBack(){
 		logger.info("更新合同状态");
 		Service service = new CarService(this);
@@ -1183,6 +1225,20 @@ public class CarController extends BaseController{
 			service.doService();
 		} catch (Exception e) {
 			logger.error("更新合同状态异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	public void updateReplaceForBack(){
+		logger.info("更新替换车状态");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("更新替换车状态异常===>" + e.getMessage());
 			this.setAttr("msg", "系统异常！");
 			this.setAttr("resFlag", "1");
 			e.printStackTrace();
@@ -1305,6 +1361,62 @@ public class CarController extends BaseController{
 			service.doService();
 		} catch (Exception e) {
 			logger.error("车辆绑卡异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	public void appOrderList(){
+		logger.info("app订单列表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("app订单列表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	public void getAppOrder(){
+		logger.info("获取订单信息");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("获取订单信息异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	public void saveAppOrder(){
+		logger.info("保存订单信息");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("保存订单信息异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
+	
+	public void checkOfferCode(){
+		logger.info("校验优惠码");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("校验优惠码异常===>" + e.getMessage());
 			this.setAttr("msg", "系统异常！");
 			this.setAttr("resFlag", "1");
 			e.printStackTrace();
