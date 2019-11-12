@@ -1423,5 +1423,31 @@ public class CarController extends BaseController{
 		}
 		renderJsonForCors();
 	}
+	public void notPayNumList(){
+		logger.info("合同列表");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("合同列表异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
 	
+	public void updateCarStatus(){
+		logger.info("updateCarStatus");
+		Service service = new CarService(this);
+		try {
+			service.doService();
+		} catch (Exception e) {
+			logger.error("updateCarStatus异常===>" + e.getMessage());
+			this.setAttr("msg", "系统异常！");
+			this.setAttr("resFlag", "1");
+			e.printStackTrace();
+		}
+		renderJsonForCors();
+	}
 }

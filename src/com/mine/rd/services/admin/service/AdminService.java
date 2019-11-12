@@ -150,6 +150,7 @@ public class AdminService extends BaseService{
 //			String action = controller.getMyParam("action").toString();
 //			num = Integer.parseInt(dao.epAdminTask(epId, action, 1, 10, "").get("totalRow").toString());
 //		}
+		controller.setAttr("notPayNum", carDao.notPayList(1, 10, "").get("totalRow").toString());
 		controller.setAttr("contractNum", carDao.contractList(1, 10, "").get("totalRow").toString());
 		controller.setAttr("repairNum", carDao.repairList(1, 10, "").get("totalRow").toString());
 		controller.setAttr("breakrulesNum", carDao.breakrulesList(1, 10, "").get("totalRow").toString());

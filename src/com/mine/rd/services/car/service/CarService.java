@@ -243,6 +243,12 @@ public class CarService extends BaseService{
 		            else if("checkOfferCode".equals(getLastMethodName(7))){
 		            	checkOfferCode();
 		            }
+		            else if("notPayNumList".equals(getLastMethodName(7))){
+		            	notPayNumList();
+		            }
+		            else if("updateCarStatus".equals(getLastMethodName(7))){
+		            	updateCarStatus();
+		            }
 	            } catch (Exception e) {
 	                e.printStackTrace();
 	                controller.setAttr("msg", "系统异常，请重新登录！");
@@ -870,6 +876,14 @@ public class CarService extends BaseService{
 		controller.setAttr("resFlag", "0");
 	}
 	
+	private void notPayNumList(){
+		pn = Integer.parseInt(controller.getMyParam("pn").toString());
+		ps = Integer.parseInt(controller.getMyParam("ps").toString());
+		Object searchContent = controller.getMyParam("searchContent");
+		controller.setAttrs(dao.notPayList(pn, ps,searchContent));
+		controller.setAttr("resFlag", "0");
+	}
+	
 	private void contractForReplaceCarList(){
 		pn = Integer.parseInt(controller.getMyParam("pn").toString());
 		ps = Integer.parseInt(controller.getMyParam("ps").toString());
@@ -1120,7 +1134,7 @@ public class CarService extends BaseService{
 			controller.setAttr("resFlag", "0");
 		}else{
 			controller.setAttr("msg","保存失败");
-			controller.setAttr("resFlag", "0");
+			controller.setAttr("resFlag", "1");
 		};
 	}
 	
@@ -1357,7 +1371,7 @@ public class CarService extends BaseService{
 	
 	private void updateReplaceForBack(){
 		String id = controller.getMyParam("id").toString();
-		if(dao.updateContractForBack(id)){
+		if(dao.updateReplaceForBack(id)){
 			controller.setAttr("msg","提交成功");
 			controller.setAttr("resFlag", "0");
 		}else{
@@ -1563,5 +1577,16 @@ public class CarService extends BaseService{
     	String code = controller.getMyParam("code") == null ? "" : controller.getMyParam("code").toString();
         Map<String,Object> map = dao.checkOfferCode(code);
     	controller.setAttr("resData",map);
+    }
+    
+    private void updateCarStatus(){
+    	Map<String, Object> map = controller.getMyParamMap("parm");
+		if(dao.updateCarStatus(map)){
+			controller.setAttr("msg","操作成功");
+			controller.setAttr("resFlag", "0");
+		}else{
+			controller.setAttr("msg","操作失败");
+			controller.setAttr("resFlag", "0");
+		};
     }
 }

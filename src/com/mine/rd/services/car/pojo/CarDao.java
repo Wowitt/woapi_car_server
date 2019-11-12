@@ -1205,7 +1205,7 @@ public class CarDao extends BaseDao {
 		record.set("CAR_PROP", map.get("CAR_PROP"));
 		record.set("CAR_DRIVER_DATE", map.get("CAR_DRIVER_DATE"));
 		record.set("CAR_DRIVER_MONTH", map.get("CAR_DRIVER_MONTH"));
-		record.set("DRIVER_YEAR_STABLE", map.get("DRIVER_YEAR_STABLE"));
+//		record.set("DRIVER_YEAR_STABLE", map.get("DRIVER_YEAR_STABLE"));
 		record.set("INSUREANCE", map.get("INSUREANCE"));
 		record.set("CAR_DRIVER_NUM", map.get("CAR_DRIVER_NUM"));
 		record.set("NUM", map.get("NUM"));
@@ -1224,6 +1224,14 @@ public class CarDao extends BaseDao {
 	}
 	
 	public boolean updateContractForBack(String id){
+		Record record = new Record();
+		record.set("ID", id);
+		record.set("STATUS","5");
+		record.set("STATUSNAME","合同结束");
+		return Db.update("C_WOBO_CONTRACT", "ID",record);
+	}
+	
+	public boolean updateReplaceForBack(String id){
 		Record record = new Record();
 		record.set("ID", id);
 		record.set("BACK_STATUS","3");
@@ -1917,6 +1925,61 @@ public class CarDao extends BaseDao {
 	public Map<String,Object> checkOfferCode(String code){
 		Record record = Db.findFirst("select * from APP_OFFER_CODE where status = '0' and code = ? ",code);
 		return record != null ? record.getColumns() : null;
+	}
+	
+	public Map<String, Object> notPayList(int pn, int ps, Object searchContent){
+		StringBuffer ori_sql = new StringBuffer();
+		ori_sql.append("(select  case when t.PAY_PERIOD = '季付' then DATE_ADD(b.actiondate,INTERVAL 3 MONTH) ");
+		ori_sql.append("when t.PAY_PERIOD = '月付' then DATE_ADD(b.actiondate,INTERVAL 1 MONTH) ");
+		ori_sql.append("when t.PAY_PERIOD = '月付(仅限以租代购分期)' then DATE_ADD(b.actiondate,INTERVAL 1 MONTH)  ");
+		ori_sql.append("when t.PAY_PERIOD = '半年付' then DATE_ADD(b.actiondate,INTERVAL 6 MONTH) ");
+		ori_sql.append("when t.PAY_PERIOD = '年付' then DATE_ADD(b.actiondate,INTERVAL 12 MONTH) ");
+		ori_sql.append("end as perioddate , ");
+		ori_sql.append("b.actiondate,t.*  ");
+		ori_sql.append("from c_wobo_contract t,c_wobo_finance_flow b  ");
+		ori_sql.append("where t.id = b.biz_id ) A ");
 		
+		String sql = "from " + ori_sql.toString() + " where A.status != '2' and a.status !='5' and a.perioddate <= now() ";
+		if(searchContent != null && !"".equals(searchContent)){
+			sql = sql + " and (A.CU_NAME like '%"+searchContent+"%' or A.ID like '%"+searchContent+"%' or A.CU_EP_NAME like '%"+searchContent+"%'  or A.TYPE like '%"+searchContent+"%' or A.STATUSNAME like '%"+searchContent+"%'  ) ";
+		}
+		sql = sql + " order by a.sysdate desc ";
+		System.out.println(sql);
+		Page<Record> page = Db.paginate(pn, ps, "select distinct  A.*  ", sql );
+		List<Record> eps = page.getList();
+		List<Map<String, Object>> epList = new ArrayList<>();
+		Map<String, Object> resMap = new HashMap<>();
+		if(eps != null){
+			for(Record record : eps){
+				Map<String, Object> map = new HashMap<>();
+				map.put("ID", record.get("ID"));
+				map.put("CU_NAME", record.get("CU_NAME"));
+				map.put("CU_TYPE", record.get("CU_TYPE"));
+				map.put("CU_PHONE", record.get("CU_PHONE"));
+				map.put("CU_EP_NAME", record.get("CU_EP_NAME"));
+				map.put("CU_SOURCE", record.get("CU_SOURCE"));
+				map.put("CU_WORK", record.get("CU_WORK"));
+				map.put("TYPE" ,record.get("TYPE"));
+				map.put("STATUSNAME", record.get("STATUSNAME"));
+				map.put("STATUS", record.get("STATUS"));
+				map.put("CARMANAGE_STATUS", record.get("CARMANAGE_STATUS"));
+				map.put("DELIVER_STATUS", record.get("DELIVER_STATUS"));
+				map.put("SALE_USER_NAME", record.get("SALE_USER_NAME"));
+				map.put("cuCoPriceList", getCuCoPriceList(record.get("ID").toString()));
+				epList.add(map);
+			}
+		}
+		resMap.put("dataList", epList);
+		resMap.put("totalPage", page.getTotalPage());
+		resMap.put("totalRow", page.getTotalRow());
+		return resMap;
+	}
+	
+	public boolean updateCarStatus(Map<String,Object> map){
+		StringBuffer sb = new StringBuffer();
+		sb.append("update C_WOBO_CAR  ");
+		sb.append("set status=? ,statusname=? ");
+		sb.append("where ID = ? ");
+		return Db.update(sb.toString(),map.get("STATUS"),map.get("STATUSNAME"),map.get("ID")) >= 0;
 	}
 }
